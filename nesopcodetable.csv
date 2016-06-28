@@ -1,150 +1,150 @@
 Mode,Operation,OpCode,No.Bytes,No.Cycles,BoundaryCross
-Immediate     ,   ADC #Oper           ,    69   ,    2    ,    2,0
-Zero Page     ,   ADC Oper            ,    65   ,    2    ,    3,0
-Zero Page X   ,   ADC Oper X          ,    75   ,    2    ,    4,0
-Absolute      ,   ADC Oper            ,    60   ,    3    ,    4,0
-Absolute X    ,   ADC Oper X          ,    70   ,    3    ,    4,1 
-Absolute Y    ,   ADC Oper Y          ,    79   ,    3    ,    4,1 
-Indirect X    ,   ADC (Oper X)        ,    61   ,    2    ,    6,0
-Indirect Y    ,   ADC (Oper Y)        ,    71   ,    2    ,    5,1 
-Immediate     ,   AND #Oper           ,    29   ,    2    ,    2,0
-Zero Page     ,   AND Oper            ,    25   ,    2    ,    3,0
-Zero Page X   ,   AND Oper X          ,    35   ,    2    ,    4,0
-Absolute      ,   AND Oper            ,    2D   ,    3    ,    4,0
-Absolute X    ,   AND Oper X          ,    3D   ,    3    ,    4,1 
-Absolute Y    ,   AND Oper Y          ,    39   ,    3    ,    4,1 
-Indirect X    ,   AND (Oper X)        ,    21   ,    2    ,    6,0
-Indirect Y    ,   AND (Oper Y)        ,    31   ,    2    ,    5,0
-Accumulator   ,   ASL A               ,    0A   ,    1    ,    2,0
-Zero Page     ,   ASL Oper            ,    06   ,    2    ,    5,0
-Zero Page X   ,   ASL Oper X          ,    16   ,    2    ,    6,0
-Absolute      ,   ASL Oper            ,    0E   ,    3    ,    6,0
-Absolute  X   ,   ASL Oper X          ,    1E   ,    3    ,    7,0
-Relative      ,   BCC Oper            ,    90   ,    2    ,    2,1 
-Relative      ,   BCS Oper            ,    B0   ,    2    ,    2,1 
-Relative      ,   BEQ Oper            ,    F0   ,    2    ,    2,1 
-Zero Page     ,   BIT Oper            ,    24   ,    2    ,    3,0
-Absolute      ,   BIT Oper            ,    2C   ,    3    ,    4,0
-Relative      ,   BMI Oper            ,    30   ,    2    ,    2,1 
-Relative      ,   BMI Oper            ,    D0   ,    2    ,    2,1 
-Relative      ,   BPL Oper            ,    10   ,    2    ,    2,1 
-Implied       ,   BRK                 ,    00   ,    1    ,    7,0
-Relative      ,   BVC Oper            ,    50   ,    2    ,    2,1 
-Relative      ,   BVS Oper            ,    70   ,    2    ,    2,1 
-Implied       ,   CLC                 ,    18   ,    1    ,    2,0
-Implied       ,   CLD                 ,    D8   ,    1    ,    2,0
-Implied       ,   CLI                 ,    58   ,    1    ,    2,0
-Implied       ,   CLV                 ,    B8   ,    1    ,    2,0
-Immediate     ,   CMP #Oper           ,    C9   ,    2    ,    2,0
-Zero Page     ,   CMP Oper            ,    C5   ,    2    ,    3,0
-Zero Page X   ,   CMP Oper X          ,    D5   ,    2    ,    4,0
-Absolute      ,   CMP Oper            ,    CD   ,    3    ,    4,0
-Absolute X    ,   CMP Oper X          ,    DD   ,    3    ,    4,1 
-Absolute Y    ,   CMP Oper Y          ,    D9   ,    3    ,    4,1 
-Indirect X    ,   CMP (Oper X)        ,    C1   ,    2    ,    6,0
-Indirect Y    ,   CMP (Oper Y)        ,    D1   ,    2    ,    5,1 
-Immediate     ,   CPX ,1Op            ,    E0   ,    2    ,    2,0
-Zero Page     ,   CPX Oper            ,    E4   ,    2    ,    3,0
-Absolute      ,   CPX Oper            ,    EC   ,    3    ,    4,0
-Immediate     ,   CPY ,1Oper          ,    C0   ,    2    ,    2,0
-Zero Page     ,   CPY Oper            ,    C4   ,    2    ,    3,0
-Absolute      ,   CPY Oper            ,    CC   ,    3    ,    4,0
-Zero Page     ,   DEC Oper            ,    C6   ,    2    ,    5,0
-Zero Page X   ,   DEC Oper X          ,    D6   ,    2    ,    6,0
-Absolute      ,   DEC Oper            ,    CE   ,    3    ,    6,0
-Absolute X    ,   DEC Oper X          ,    DE   ,    3    ,    7,0
-Implied       ,   DEX                 ,    CA   ,    1    ,    2,0
-Implied       ,   DEY                 ,    88   ,    1    ,    2,0
-Immediate     ,   EOR #Oper           ,    49   ,    2    ,    2,0
-Zero Page     ,   EOR Oper            ,    45   ,    2    ,    3,0
-Zero Page X   ,   EOR Oper X          ,    55   ,    2    ,    4,0
-Absolute      ,   EOR Oper            ,    40   ,    3    ,    4,0
-Absolute X    ,   EOR Oper X          ,    50   ,    3    ,    4,1 
-Absolute Y    ,   EOR Oper Y          ,    59   ,    3    ,    4,1 
-Indirect X    ,   EOR (Oper X)        ,    41   ,    2    ,    6,0
-Indirect Y    ,   EOR (Oper Y)        ,    51   ,    2    ,    5,1 
-Zero Page     ,   INC Oper            ,    E6   ,    2    ,    5,0
-Zero Page X   ,   INC Oper X          ,    F6   ,    2    ,    6,0
-Absolute      ,   INC Oper            ,    EE   ,    3    ,    6,0
-Absolute X    ,   INC Oper X          ,    FE   ,    3    ,    7 ,0
-Implied       ,   INX                 ,    E8   ,    1    ,    2,0
-Implied       ,   INY                 ,    C8   ,    1    ,    2,0
-Absolute      ,   JMP Oper            ,    4C   ,    3    ,    3,0
-Indirect      ,   JMP (Oper)          ,    6C   ,    3    ,    5,0
-Absolute      ,   JSR Oper            ,    20   ,    3    ,    6,0
-Immediate     ,   LDA #Oper           ,    A9   ,    2    ,    2,0
-Zero Page     ,   LDA Oper            ,    A5   ,    2    ,    3,0
-Zero Page X   ,   LDA Oper X          ,    B5   ,    2    ,    4,0
-Absolute      ,   LDA Oper            ,    AD   ,    3    ,    4,0
-Absolute X    ,   LDA Oper X          ,    BD   ,    3    ,    4,1 
-Absolute Y    ,   LDA Oper Y          ,    B9   ,    3    ,    4,1 
-Indirect X    ,   LDA (Oper X)        ,    A1   ,    2    ,    6,0
-Indirect Y    ,   LDA (Oper Y)        ,    B1   ,    2    ,    5,1 
-Immediate     ,   LDX #Oper           ,    A2   ,    2    ,    2,0
-Zero Page     ,   LDX Oper            ,    A6   ,    2    ,    3,0
-Zero Page Y   ,   LDX Oper Y          ,    B6   ,    2    ,    4,0
-Absolute      ,   LDX Oper            ,    AE   ,    3    ,    4,0
-Absolute Y    ,   LDX Oper Y          ,    BE   ,    3    ,    4,1 
-Immediate     ,   LDY #Oper           ,    A0   ,    2    ,    2,0
-Zero Page     ,   LDY Oper            ,    A4   ,    2    ,    3,0
-Zero Page X   ,   LDY Oper X          ,    B4   ,    2    ,    4,0
-Absolute      ,   LDY Oper            ,    AC   ,    3    ,    4,0
-Absolute X    ,   LDY Oper X          ,    BC   ,    3    ,    4,1 
-Accumulator   ,   LSR A               ,    4A   ,    1    ,    2,0
-Zero Page     ,   LSR Oper            ,    46   ,    2    ,    5,0
-Zero Page X   ,   LSR Oper X          ,    56   ,    2    ,    6,0
-Implied       ,   NOP                 ,    EA   ,    1    ,    2,0
-Immediate     ,   ORA #Oper           ,    09   ,    2    ,    2,0
-Zero Page     ,   ORA Oper            ,    05   ,    2    ,    3,0
-Zero Page X   ,   ORA Oper X          ,    15   ,    2    ,    4,0
-Absolute      ,   ORA Oper            ,    0D   ,    3    ,    4,0
-Absolute X    ,   ORA Oper X          ,    1D   ,    3    ,    4,1 
-Absolute Y    ,   ORA Oper Y          ,    19   ,    3    ,    4,1 
-Indirect X    ,   ORA (Oper X)        ,    01   ,    2    ,    6,0
-Indirect Y    ,   ORA (Oper Y)        ,    11   ,    2    ,    5,0
-Implied       ,   PHA                 ,    48   ,    1    ,    3,0
-Implied       ,   PHP                 ,    08   ,    1    ,    3,0
-Implied       ,   PLA                 ,    68   ,    1    ,    4,0
-Implied       ,   PLP                 ,    28   ,    1    ,    4,0
-Accumulator   ,   ROL A               ,    2A   ,    1    ,    2,0
-Zero Page     ,   ROL Oper            ,    26   ,    2    ,    5,0
-Zero Page X   ,   ROL Oper X          ,    36   ,    2    ,    6,0
-Absolute      ,   ROL Oper            ,    2E   ,    3    ,    6,0
-Absolute X    ,   ROL Oper X          ,    3E   ,    3    ,    7,0
-Accumulator   ,   ROR A               ,    6A   ,    1    ,    2,0
-Zero Page     ,   ROR Oper            ,    66   ,    2    ,    5,0
-Zero Page X   ,   ROR Oper X          ,    76   ,    2    ,    6,0
-Absolute      ,   ROR Oper            ,    6E   ,    3    ,    6,0
-Absolute X    ,   ROR Oper X          ,    7E   ,    3    ,    7,0
-Implied       ,   RTI                 ,    4D   ,    1    ,    6,0
-Implied       ,   RTS                 ,    60   ,    1    ,    6,0
-Immediate     ,   SBC #Oper           ,    E9   ,    2    ,    2,0
-Zero Page     ,   SBC Oper            ,    E5   ,    2    ,    3,0
-Zero Page X   ,   SBC Oper X          ,    F5   ,    2    ,    4,0
-Absolute      ,   SBC Oper            ,    ED   ,    3    ,    4,0
-Absolute X    ,   SBC Oper X          ,    FD   ,    3    ,    4,1 
-Absolute Y    ,   SBC Oper Y          ,    F9   ,    3    ,    4,1 
-Indirect X    ,   SBC (Oper X)        ,    E1   ,    2    ,    6,0
-Indirect Y    ,   SBC (Oper Y)        ,    F1   ,    2    ,    5,0
-Implied       ,   SEC                 ,    38   ,    1    ,    2,0
-Implied       ,   SED                 ,    F8   ,    1    ,    2,0
-Implied       ,   SEI                 ,    78   ,    1    ,    2,0
-Zero Page     ,   STA Oper            ,    85   ,    2    ,    3,0
-Zero Page X   ,   STA Oper X          ,    95   ,    2    ,    4,0
-Absolute      ,   STA Oper            ,    80   ,    3    ,    4,0
-Absolute X    ,   STA Oper X          ,    90   ,    3    ,    5,0
-Absolute Y    ,   STA Oper  Y         ,    99   ,    3    ,    5,0
-Indirect X    ,   STA (Oper X)        ,    81   ,    2    ,    6,0
-Indirect Y    ,   STA (Oper Y)        ,    91   ,    2    ,    6,0
-Zero Page     ,   STX Oper            ,    86   ,    2    ,    3,0
-Zero Page Y   ,   STX Oper Y          ,    96   ,    2    ,    4,0
-Absolute      ,   STX Oper            ,    8E   ,    3    ,    4,0
-Zero Page     ,   STY Oper            ,    84   ,    2    ,    3,0
-Zero Page X   ,   STY Oper X          ,    94   ,    2    ,    4,0
-Absolute      ,   STY Oper            ,    8C   ,    3    ,    4,0
-Implied       ,   TAX                 ,    AA   ,    1    ,    2,0
-Implied       ,   TAY                 ,    A8   ,    1    ,    2,0
-Implied       ,   TSX                 ,    BA   ,    1    ,    2,0
-Implied       ,   TXA                 ,    8A   ,    1    ,    2,0
-Implied       ,   TXS                 ,    9A   ,    1    ,    2,0
-Implied       ,   TYA                 ,    98   ,    1    ,    2,0  
+Immediate     ,   ADC    ,    69   ,    2    ,    2,0
+Zero Page     ,   ADC    ,    65   ,    2    ,    3,0
+Zero Page X   ,   ADC    ,    75   ,    2    ,    4,0
+Absolute      ,   ADC    ,    60   ,    3    ,    4,0
+Absolute X    ,   ADC    ,    70   ,    3    ,    4,1 
+Absolute Y    ,   ADC    ,    79   ,    3    ,    4,1 
+Indirect X    ,   ADC    ,    61   ,    2    ,    6,0
+Indirect Y    ,   ADC    ,    71   ,    2    ,    5,1 
+Immediate     ,   AND    ,    29   ,    2    ,    2,0
+Zero Page     ,   AND    ,    25   ,    2    ,    3,0
+Zero Page X   ,   AND    ,    35   ,    2    ,    4,0
+Absolute      ,   AND    ,    2D   ,    3    ,    4,0
+Absolute X    ,   AND    ,    3D   ,    3    ,    4,1 
+Absolute Y    ,   AND    ,    39   ,    3    ,    4,1 
+Indirect X    ,   AND    ,    21   ,    2    ,    6,0
+Indirect Y    ,   AND    ,    31   ,    2    ,    5,0
+Accumulator   ,   ASL    ,    0A   ,    1    ,    2,0
+Zero Page     ,   ASL    ,    06   ,    2    ,    5,0
+Zero Page X   ,   ASL    ,    16   ,    2    ,    6,0
+Absolute      ,   ASL    ,    0E   ,    3    ,    6,0
+Absolute  X   ,   ASL    ,    1E   ,    3    ,    7,0
+Relative      ,   BCC    ,    90   ,    2    ,    2,1 
+Relative      ,   BCS    ,    B0   ,    2    ,    2,1 
+Relative      ,   BEQ    ,    F0   ,    2    ,    2,1 
+Zero Page     ,   BIT    ,    24   ,    2    ,    3,0
+Absolute      ,   BIT    ,    2C   ,    3    ,    4,0
+Relative      ,   BMI    ,    30   ,    2    ,    2,1 
+Relative      ,   BMI    ,    D0   ,    2    ,    2,1 
+Relative      ,   BPL    ,    10   ,    2    ,    2,1 
+Implied       ,   BRK    ,    00   ,    1    ,    7,0
+Relative      ,   BVC    ,    50   ,    2    ,    2,1 
+Relative      ,   BVS    ,    70   ,    2    ,    2,1 
+Implied       ,   CLC    ,    18   ,    1    ,    2,0
+Implied       ,   CLD    ,    D8   ,    1    ,    2,0
+Implied       ,   CLI    ,    58   ,    1    ,    2,0
+Implied       ,   CLV    ,    B8   ,    1    ,    2,0
+Immediate     ,   CMP    ,    C9   ,    2    ,    2,0
+Zero Page     ,   CMP    ,    C5   ,    2    ,    3,0
+Zero Page X   ,   CMP    ,    D5   ,    2    ,    4,0
+Absolute      ,   CMP    ,    CD   ,    3    ,    4,0
+Absolute X    ,   CMP    ,    DD   ,    3    ,    4,1 
+Absolute Y    ,   CMP    ,    D9   ,    3    ,    4,1 
+Indirect X    ,   CMP    ,    C1   ,    2    ,    6,0
+Indirect Y    ,   CMP    ,    D1   ,    2    ,    5,1 
+Immediate     ,   CPX    ,    E0   ,    2    ,    2,0
+Zero Page     ,   CPX    ,    E4   ,    2    ,    3,0
+Absolute      ,   CPX    ,    EC   ,    3    ,    4,0
+Immediate     ,   CPY    ,    C0   ,    2    ,    2,0
+Zero Page     ,   CPY    ,    C4   ,    2    ,    3,0
+Absolute      ,   CPY    ,    CC   ,    3    ,    4,0
+Zero Page     ,   DEC    ,    C6   ,    2    ,    5,0
+Zero Page X   ,   DEC    ,    D6   ,    2    ,    6,0
+Absolute      ,   DEC    ,    CE   ,    3    ,    6,0
+Absolute X    ,   DEC    ,    DE   ,    3    ,    7,0
+Implied       ,   DEX    ,    CA   ,    1    ,    2,0
+Implied       ,   DEY    ,    88   ,    1    ,    2,0
+Immediate     ,   EOR    ,    49   ,    2    ,    2,0
+Zero Page     ,   EOR    ,    45   ,    2    ,    3,0
+Zero Page X   ,   EOR    ,    55   ,    2    ,    4,0
+Absolute      ,   EOR    ,    40   ,    3    ,    4,0
+Absolute X    ,   EOR    ,    50   ,    3    ,    4,1 
+Absolute Y    ,   EOR    ,    59   ,    3    ,    4,1 
+Indirect X    ,   EOR    ,    41   ,    2    ,    6,0
+Indirect Y    ,   EOR    ,    51   ,    2    ,    5,1 
+Zero Page     ,   INC    ,    E6   ,    2    ,    5,0
+Zero Page X   ,   INC    ,    F6   ,    2    ,    6,0
+Absolute      ,   INC    ,    EE   ,    3    ,    6,0
+Absolute X    ,   INC    ,    FE   ,    3    ,    7 ,0
+Implied       ,   INX    ,    E8   ,    1    ,    2,0
+Implied       ,   INY    ,    C8   ,    1    ,    2,0
+Absolute      ,   JMP    ,    4C   ,    3    ,    3,0
+Indirect      ,   JMP    ,    6C   ,    3    ,    5,0
+Absolute      ,   JSR    ,    20   ,    3    ,    6,0
+Immediate     ,   LDA    ,    A9   ,    2    ,    2,0
+Zero Page     ,   LDA    ,    A5   ,    2    ,    3,0
+Zero Page X   ,   LDA    ,    B5   ,    2    ,    4,0
+Absolute      ,   LDA    ,    AD   ,    3    ,    4,0
+Absolute X    ,   LDA    ,    BD   ,    3    ,    4,1 
+Absolute Y    ,   LDA    ,    B9   ,    3    ,    4,1 
+Indirect X    ,   LDA    ,    A1   ,    2    ,    6,0
+Indirect Y    ,   LDA    ,    B1   ,    2    ,    5,1 
+Immediate     ,   LDX    ,    A2   ,    2    ,    2,0
+Zero Page     ,   LDX    ,    A6   ,    2    ,    3,0
+Zero Page Y   ,   LDX    ,    B6   ,    2    ,    4,0
+Absolute      ,   LDX    ,    AE   ,    3    ,    4,0
+Absolute Y    ,   LDX    ,    BE   ,    3    ,    4,1 
+Immediate     ,   LDY    ,    A0   ,    2    ,    2,0
+Zero Page     ,   LDY    ,    A4   ,    2    ,    3,0
+Zero Page X   ,   LDY    ,    B4   ,    2    ,    4,0
+Absolute      ,   LDY    ,    AC   ,    3    ,    4,0
+Absolute X    ,   LDY    ,    BC   ,    3    ,    4,1 
+Accumulator   ,   LSR    ,    4A   ,    1    ,    2,0
+Zero Page     ,   LSR    ,    46   ,    2    ,    5,0
+Zero Page X   ,   LSR    ,    56   ,    2    ,    6,0
+Implied       ,   NOP    ,    EA   ,    1    ,    2,0
+Immediate     ,   ORA    ,    09   ,    2    ,    2,0
+Zero Page     ,   ORA    ,    05   ,    2    ,    3,0
+Zero Page X   ,   ORA    ,    15   ,    2    ,    4,0
+Absolute      ,   ORA    ,    0D   ,    3    ,    4,0
+Absolute X    ,   ORA    ,    1D   ,    3    ,    4,1 
+Absolute Y    ,   ORA    ,    19   ,    3    ,    4,1 
+Indirect X    ,   ORA    ,    01   ,    2    ,    6,0
+Indirect Y    ,   ORA    ,    11   ,    2    ,    5,0
+Implied       ,   PHA    ,    48   ,    1    ,    3,0
+Implied       ,   PHP    ,    08   ,    1    ,    3,0
+Implied       ,   PLA    ,    68   ,    1    ,    4,0
+Implied       ,   PLP    ,    28   ,    1    ,    4,0
+Accumulator   ,   ROL    ,    2A   ,    1    ,    2,0
+Zero Page     ,   ROL    ,    26   ,    2    ,    5,0
+Zero Page X   ,   ROL    ,    36   ,    2    ,    6,0
+Absolute      ,   ROL    ,    2E   ,    3    ,    6,0
+Absolute X    ,   ROL    ,    3E   ,    3    ,    7,0
+Accumulator   ,   ROR    ,    6A   ,    1    ,    2,0
+Zero Page     ,   ROR    ,    66   ,    2    ,    5,0
+Zero Page X   ,   ROR    ,    76   ,    2    ,    6,0
+Absolute      ,   ROR    ,    6E   ,    3    ,    6,0
+Absolute X    ,   ROR    ,    7E   ,    3    ,    7,0
+Implied       ,   RTI    ,    4D   ,    1    ,    6,0
+Implied       ,   RTS    ,    60   ,    1    ,    6,0
+Immediate     ,   SBC    ,    E9   ,    2    ,    2,0
+Zero Page     ,   SBC    ,    E5   ,    2    ,    3,0
+Zero Page X   ,   SBC    ,    F5   ,    2    ,    4,0
+Absolute      ,   SBC    ,    ED   ,    3    ,    4,0
+Absolute X    ,   SBC    ,    FD   ,    3    ,    4,1 
+Absolute Y    ,   SBC    ,    F9   ,    3    ,    4,1 
+Indirect X    ,   SBC    ,    E1   ,    2    ,    6,0
+Indirect Y    ,   SBC    ,    F1   ,    2    ,    5,0
+Implied       ,   SEC    ,    38   ,    1    ,    2,0
+Implied       ,   SED    ,    F8   ,    1    ,    2,0
+Implied       ,   SEI    ,    78   ,    1    ,    2,0
+Zero Page     ,   STA    ,    85   ,    2    ,    3,0
+Zero Page X   ,   STA    ,    95   ,    2    ,    4,0
+Absolute      ,   STA    ,    80   ,    3    ,    4,0
+Absolute X    ,   STA    ,    90   ,    3    ,    5,0
+Absolute Y    ,   STA    ,    99   ,    3    ,    5,0
+Indirect X    ,   STA    ,    81   ,    2    ,    6,0
+Indirect Y    ,   STA    ,    91   ,    2    ,    6,0
+Zero Page     ,   STX    ,    86   ,    2    ,    3,0
+Zero Page Y   ,   STX    ,    96   ,    2    ,    4,0
+Absolute      ,   STX    ,    8E   ,    3    ,    4,0
+Zero Page     ,   STY    ,    84   ,    2    ,    3,0
+Zero Page X   ,   STY    ,    94   ,    2    ,    4,0
+Absolute      ,   STY    ,    8C   ,    3    ,    4,0
+Implied       ,   TAX    ,    AA   ,    1    ,    2,0
+Implied       ,   TAY    ,    A8   ,    1    ,    2,0
+Implied       ,   TSX    ,    BA   ,    1    ,    2,0
+Implied       ,   TXA    ,    8A   ,    1    ,    2,0
+Implied       ,   TXS    ,    9A   ,    1    ,    2,0
+Implied       ,   TYA    ,    98   ,    1    ,    2,0  

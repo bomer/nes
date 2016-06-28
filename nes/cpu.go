@@ -19,6 +19,7 @@ type Cpu struct {
 
 func (self *Cpu) Init() {
 	fmt.Printf("Mode_Absolute %d \n", Mode_Absolute)
+	fmt.Printf("Mode_Absolute %% \n", OpTable[0].Mode)
 	self.PC = 0xFFFC
 	self.SP = 0x00
 
