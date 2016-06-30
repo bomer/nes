@@ -19,8 +19,11 @@ type Cpu struct {
 
 func (self *Cpu) Init() {
 	fmt.Printf("Mode_Absolute %d \n", Mode_Absolute)
-	fmt.Printf("Mode_Absolute %% \n", OpTable[0].Mode)
+	fmt.Printf("Mode_Absolute %% \n", OpTable[0])
 	self.PC = 0xFFFC
 	self.SP = 0x00
+
+}
+func (self *Cpu) EmulateCycle() {
 
 }

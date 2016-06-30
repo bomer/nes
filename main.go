@@ -12,4 +12,8 @@ func main() {
 	fmt.Printf("Initing...")
 	myNes.Cpu.Init()
 
+	for {
+		myNes.Cpu.EmulateCycle()
+	}
+
 }
