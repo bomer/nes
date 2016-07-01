@@ -17,6 +17,10 @@ type Cpu struct {
 
 }
 
+func (self *Cpu) PrintInstruction() {
+
+}
+
 func (self *Cpu) Init() {
 	fmt.Printf("Mode_Absolute %d \n", Mode_Absolute)
 	fmt.Printf("Mode_Absolute %% \n", OpTable[0])

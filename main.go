@@ -10,10 +10,10 @@ var myNes nes.Nes
 func main() {
 
 	fmt.Printf("Initing...")
-	myNes.Cpu.Init()
+	myNes.Init()
 
-	for {
-		myNes.Cpu.EmulateCycle()
-	}
+	// for {
+	// 	myNes.Cpu.EmulateCycle()
+	// }
 
 }
