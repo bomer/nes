@@ -15,6 +15,13 @@ type Cpu struct {
 	//Z V   B D I Z C
 	//C=Carry, Z=Zero, I=Interupt, D=Decimal,B=Brk/software interupt, V-Overflow,S=Sign, 1=negative
 
+	//64 kb of memory, adressing space of 0x0000 to 0xFFFF
+	Memory [2 ^ 16]byte
+}
+
+func (self *Cpu) WriteMemory(address uint16, value byte) {
+	fmt.Printf("Writing adress %02x with %d", address, value)
+
 }
 
 func (self *Cpu) PrintInstruction() {
