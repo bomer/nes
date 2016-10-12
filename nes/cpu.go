@@ -20,7 +20,7 @@ type Cpu struct {
 }
 
 func (self *Cpu) WriteMemory(address uint16, value byte) {
-	fmt.Printf("Writing adress %02x with %d", address, value)
+	fmt.Printf("Writing adress %02x with %d \n", address, value)
 
 }
 

@@ -9,7 +9,8 @@ type Nes struct {
 }
 
 func WriteMemory(address uint16, value byte) {
-	fmt.Printf("Writing adress %02x with %d, old =  ", address, value) //Cpu.Memory[address]
+	nes.Cpu.Memory [address]=value
+	fmt.Printf("Writing adress %02x with %d, old =  \n", address, value) //Cpu.Memory[address]
 
 }
 
