@@ -16,11 +16,15 @@ type Cpu struct {
 	//C=Carry, Z=Zero, I=Interupt, D=Decimal,B=Brk/software interupt, V-Overflow,S=Sign, 1=negative
 
 	//64 kb of memory, adressing space of 0x0000 to 0xFFFF
-	Memory [2 ^ 16]byte
+	Memory [0xffff]byte
+
+	RomReader Rom
 }
 
 func (self *Cpu) WriteMemory(address uint16, value byte) {
-	fmt.Printf("Writing adress %02x with %d \n", address, value)
+	fmt.Printf("CPU-Writing adress %02x with %d \n", address, value)
+	// fmt.Printf(self.Memory)
+	self.Memory[address] = value
 
 }
 
@@ -28,11 +32,17 @@ func (self *Cpu) PrintInstruction() {
 
 }
 
+func (self *Cpu) loadRom() {
+	// self.RomReader.LoadGame("mario.nes")
+	// LoadGame("mario.nes")
+}
+
 func (self *Cpu) Init() {
 	fmt.Printf("Mode_Absolute %d \n", Mode_Absolute)
 	fmt.Printf("Mode_Absolute %% \n", OpTable[0])
 	self.PC = 0xFFFC
 	self.SP = 0x00
+	// self.loadRom()
 
 }
 func (self *Cpu) EmulateCycle() {

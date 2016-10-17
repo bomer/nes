@@ -17,8 +17,8 @@ type RomHeader struct {
 }
 
 // Where the cartridge is read in
-//Read file in curent dir into Memory
-func LoadGame(filename string) {
+//Read file in curent dir into Memory of NES CPU
+func (self *Rom) LoadGame(filename string, cpu Cpu) {
 	var header RomHeader
 	rom, _ := ioutil.ReadFile(filename)
 	rom_length := len(rom)
@@ -47,13 +47,12 @@ func LoadGame(filename string) {
 	fmt.Printf("Nes Rom Info - %d PGR Banks, %d CHR Banks \n", header.PGR_banks, header.CHR_banks)
 	fmt.Printf("Control = %d", header.Control)
 
-	//If room to store ROM in RAM, start at 512 or 0x200
 	//Assuming MM0
 	PGRBytes := (1024*16)*int(header.PGR_banks) + 16
 	fmt.Printf("Writing %d\n", PGRBytes)
 	i := 0
 	for i = 0; i < PGRBytes; i++ {
-		WriteMemory(uint16(i + +0x8000 - 16), rom[i])
+		cpu.WriteMemory(uint16(i + +0x8000 - 16), rom[i])
 	}
 	fmt.Printf("wrote %d bytes \n", i)
 	// if (4096 - 512) > 2^14 {

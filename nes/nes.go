@@ -6,16 +6,17 @@ import (
 
 type Nes struct {
 	Cpu Cpu
+	Rom Rom
 }
 
-func WriteMemory(address uint16, value byte) {
-	nes.Cpu.Memory [address]=value
-	fmt.Printf("Writing adress %02x with %d, old =  \n", address, value) //Cpu.Memory[address]
+func (nes *Nes) WriteMemory(address uint16, value byte) {
+	// Cpu.Memory[address] = value
+	fmt.Printf("NES : Writing adress %02x with %d, old =  \n", address, value) //Cpu.Memory[address]
 
 }
 
 func (nes *Nes) Init() {
 	nes.Cpu.Init()
-	LoadGame("mario.nes")
+	nes.Rom.LoadGame("mario.nes", nes.Cpu)
 
 }
