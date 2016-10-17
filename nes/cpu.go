@@ -16,7 +16,7 @@ type Cpu struct {
 	//C=Carry, Z=Zero, I=Interupt, D=Decimal,B=Brk/software interupt, V-Overflow,S=Sign, 1=negative
 
 	//64 kb of memory, adressing space of 0x0000 to 0xFFFF
-	Memory [0xffff]byte
+	Memory [0xFFFF + 1]byte
 
 	RomReader Rom
 }

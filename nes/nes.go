@@ -11,7 +11,7 @@ type Nes struct {
 
 func (nes *Nes) WriteMemory(address uint16, value byte) {
 	// Cpu.Memory[address] = value
-	fmt.Printf("NES : Writing adress %02x with %d, old =  \n", address, value) //Cpu.Memory[address]
+	fmt.Printf("NES : Writing adress %02x with %02x, old =  \n", address, value) //Cpu.Memory[address]
 
 }
 

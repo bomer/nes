@@ -48,11 +48,11 @@ func (self *Rom) LoadGame(filename string, cpu Cpu) {
 	fmt.Printf("Control = %d", header.Control)
 
 	//Assuming MM0
-	PGRBytes := (1024*16)*int(header.PGR_banks) + 16
+	PGRBytes := (1024 * 16) * int(header.PGR_banks) // + 16 to ignore header? Removed
 	fmt.Printf("Writing %d\n", PGRBytes)
 	i := 0
 	for i = 0; i < PGRBytes; i++ {
-		cpu.WriteMemory(uint16(i + +0x8000 - 16), rom[i])
+		cpu.WriteMemory(uint16(i+0x8000), rom[i+16])
 	}
 	fmt.Printf("wrote %d bytes \n", i)
 	// if (4096 - 512) > 2^14 {
