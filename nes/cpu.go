@@ -22,10 +22,10 @@ type Cpu struct {
 }
 
 func (self *Cpu) WriteMemory(address uint16, value byte) {
-	fmt.Printf("CPU-Writing adress %02x with %d \n", address, value)
+	// fmt.Printf("CPU-Writing adress %02x with %d \n", address, value)
 	// fmt.Printf(self.Memory)
+	//TODO. Extra mapping, mirrors, etc.
 	self.Memory[address] = value
-
 }
 
 func (self *Cpu) PrintInstruction() {
