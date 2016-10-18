@@ -88,6 +88,16 @@ type OpCodeInfo struct {
 	BoundaryCross byte
 }
 
+func (o *OpCodeInfo) ModeString() string {
+	name := []string{"_", "Mode_Immediate", "Mode_Absolute", "Mode_AbsoluteX", "Mode_AbsoluteY", "Mode_Accumulator", "Mode_Implied", "Mode_Indirect", "Mode_IndirectX", "Mode_IndirectY", "Mode_Relative", "Mode_ZeroPage", "Mode_ZeroPageX", "Mode_ZeroPageY"}
+	return name[o.Mode]
+}
+
+func (o *OpCodeInfo) OperationString() string {
+	name := []string{"ADC", "AND", "ASL", "BCC", "BCS", "BEQ", "BIT", "BMI", "BNE", "BPL", "BRK", "BVC", "BVS", "CLC", "CLD", "CLI", "CLV", "CMP", "CPX", "CPY", "DEC", "DEX", "DEY", "EOR", "INC", "INX", "INY", "JMP", "JSR", "LDA", "LDX", "LDY", "LSR", "NOP", "ORA", "PHA", "PHP", "PLA", "PLP", "ROL", "ROR", "RTI", "RTS", "SBC", "SEC", "SED", "SEI", "STA", "STX", "STY", "TAX", "TAY", "TSX", "TXA", "TXS", "TYA"}
+	return name[o.Operation]
+}
+
 var OpTable = map[int]OpCodeInfo{
 	// 0x00: OpCodeInfo{Mode_Implied, BRK, 1, 7, 0},
 

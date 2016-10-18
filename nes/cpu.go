@@ -1,6 +1,8 @@
 package nes
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Cpu struct {
 	PC uint16 //Programing Counter, which instruction to read next
@@ -19,16 +21,27 @@ type Cpu struct {
 	Memory [0xFFFF + 1]byte
 
 	RomReader Rom
+
+	//non Global items, used to track instruction info
+	instruction byte       //Current value stored at memory[pc]
+	info        OpCodeInfo //Stores information about how to read the full op code
 }
 
 func (self *Cpu) WriteMemory(address uint16, value byte) {
 	// fmt.Printf("CPU-Writing adress %02x with %d \n", address, value)
-	// fmt.Printf(self.Memory)
 	//TODO. Extra mapping, mirrors, etc.
 	self.Memory[address] = value
 }
 
-func (self *Cpu) PrintInstruction() {
+func (self *Cpu) DecodeInstruction() {
+	fmt.Printf("About to run instruction at %d", self.PC)
+	self.instruction = self.Memory[self.PC]
+	fmt.Printf("memory val = %02x \n", self.instruction)
+	info := OpTable[int(self.instruction)]
+	fmt.Printf("Instruction info %+v \n", info)
+	fmt.Printf("Mode - %s, Operation - %s \n", info.ModeString(), info.OperationString())
+
+	fmt.Printf("\n")
 
 }
 
@@ -46,5 +59,6 @@ func (self *Cpu) Init() {
 
 }
 func (self *Cpu) EmulateCycle() {
+	self.DecodeInstruction()
 
 }
