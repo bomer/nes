@@ -43,6 +43,18 @@ func (self *Cpu) DecodeInstruction() {
 
 	fmt.Printf("\n")
 
+	// var address uint16 //Address of what we're going to read based on the MODE
+	switch info.Mode {
+	case Mode_Absolute:
+		// address=self.Memory
+		b1 := byte(self.Memory[self.PC+1])
+		b2 := byte(self.Memory[self.PC+2])
+
+		fmt.Printf("Op Code %02x , B1=%02x b2=%02x", self.instruction, b1, b2)
+	case Mode_Implied:
+
+	}
+
 }
 
 func (self *Cpu) loadRom() {
@@ -52,7 +64,11 @@ func (self *Cpu) loadRom() {
 
 func (self *Cpu) Init() {
 	fmt.Printf("Mode_Absolute %d \n", Mode_Absolute)
-	fmt.Printf("Mode_Absolute %% \n", OpTable[0])
+	fmt.Printf("Mode_Absolute %+v \n", OpTable[0x00])
+	var i int
+	a, _ := fmt.Scanf("%d", &i)
+	fmt.Printf("%d", a)
+
 	self.PC = 0xFFFC
 	self.SP = 0x00
 	// self.loadRom()
