@@ -94,14 +94,13 @@ func (o *OpCodeInfo) ModeString() string {
 }
 
 func (o *OpCodeInfo) OperationString() string {
-	name := []string{"ADC", "AND", "ASL", "BCC", "BCS", "BEQ", "BIT", "BMI", "BNE", "BPL", "BRK", "BVC", "BVS", "CLC", "CLD", "CLI", "CLV", "CMP", "CPX", "CPY", "DEC", "DEX", "DEY", "EOR", "INC", "INX", "INY", "JMP", "JSR", "LDA", "LDX", "LDY", "LSR", "NOP", "ORA", "PHA", "PHP", "PLA", "PLP", "ROL", "ROR", "RTI", "RTS", "SBC", "SEC", "SED", "SEI", "STA", "STX", "STY", "TAX", "TAY", "TSX", "TXA", "TXS", "TYA"}
+	name := []string{"_", "ADC", "AND", "ASL", "BCC", "BCS", "BEQ", "BIT", "BMI", "BNE", "BPL", "BRK", "BVC", "BVS", "CLC", "CLD", "CLI", "CLV", "CMP", "CPX", "CPY", "DEC", "DEX", "DEY", "EOR", "INC", "INX", "INY", "JMP", "JSR", "LDA", "LDX", "LDY", "LSR", "NOP", "ORA", "PHA", "PHP", "PLA", "PLP", "ROL", "ROR", "RTI", "RTS", "SBC", "SEC", "SED", "SEI", "STA", "STX", "STY", "TAX", "TAY", "TSX", "TXA", "TXS", "TYA"}
 	return name[o.Operation]
 }
 
 var OpTable = map[int]OpCodeInfo{
 	// 0x00: OpCodeInfo{Mode_Implied, BRK, 1, 7, 0},
 
-	0x69: OpCodeInfo{Mode_Immediate, ADC, 2, 2, 0},
 	0x00: OpCodeInfo{Mode_Implied, BRK, 1, 7, 0},
 	0x01: OpCodeInfo{Mode_IndirectX, ORA, 2, 6, 0},
 	0x05: OpCodeInfo{Mode_ZeroPage, ORA, 2, 3, 0},
@@ -144,6 +143,7 @@ var OpTable = map[int]OpCodeInfo{
 	0x65: OpCodeInfo{Mode_ZeroPage, ADC, 2, 3, 0},
 	0x66: OpCodeInfo{Mode_ZeroPage, ROR, 2, 5, 0},
 	0x68: OpCodeInfo{Mode_Implied, PLA, 1, 4, 0},
+	0x69: OpCodeInfo{Mode_Immediate, ADC, 2, 2, 0},
 	0x70: OpCodeInfo{Mode_Relative, BVC, 2, 2, 1},
 	0x71: OpCodeInfo{Mode_IndirectY, ADC, 2, 5, 1},
 	0x75: OpCodeInfo{Mode_ZeroPageX, ADC, 2, 4, 0},
