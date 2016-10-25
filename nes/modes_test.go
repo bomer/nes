@@ -28,7 +28,4 @@ func TestModes(t *testing.T) {
 	if info.OperationString() != "ADC" {
 		t.Error("Wrong Operation Retrieved")
 	}
-	// fmt.Printf("%v", myNes)
-	// if
-	// t.Error("Wrong Mode Retrieved")
 }

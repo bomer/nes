@@ -5,17 +5,13 @@ import (
 	"time"
 )
 
+//Contains all NES Compontents, trying to keep as close to the original system at possible
 type Nes struct {
 	Cpu Cpu
 	Rom Rom
 }
 
-func (nes *Nes) OLDWriteMemory(address uint16, value byte) {
-	// Cpu.Memory[address] = value
-	fmt.Printf("NES : Writing adress %02x with %02x, old =  \n", address, value) //Cpu.Memory[address]
-
-}
-
+//Starts NES system. This controlls the main loop and emulation of CPU Cycles
 func (nes *Nes) Init() {
 	nes.Cpu.Init()
 	nes.Rom.LoadGame("mario.nes", &nes.Cpu)

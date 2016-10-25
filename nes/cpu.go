@@ -43,17 +43,66 @@ func (self *Cpu) DecodeInstruction() {
 
 	fmt.Printf("\n")
 
-	// var address uint16 //Address of what we're going to read based on the MODE
+	var address uint16 //Address of what we're going to read based on the MODE
 	switch info.Mode {
 	case Mode_Absolute:
 		// address=self.Memory
+		// abcd stored in x=34 x+1=12
 		b1 := byte(self.Memory[self.PC+1])
 		b2 := byte(self.Memory[self.PC+2])
 
 		fmt.Printf("Op Code %02x , B1=%02x b2=%02x", self.instruction, b1, b2)
-	case Mode_Implied:
+		address = uint16(b2>>8 | b1)
+		fmt.Printf("%02x", address)
+		break
+	case Mode_AbsoluteX:
+		b1 := byte(self.Memory[self.PC+1])
+		b2 := byte(self.Memory[self.PC+2])
+		address = uint16(b2>>8|b1) + uint16(self.X)
+		break
 
+	case Mode_AbsoluteY:
+		b1 := byte(self.Memory[self.PC+1])
+		b2 := byte(self.Memory[self.PC+2])
+		address = uint16(b2>>8|b1) + uint16(self.Y)
+		break
+
+	case Mode_Indirect: // TODO, need to do indirect_X and Y. Contains bug
+		break
+
+	case Mode_Immediate:
+		address = self.PC + 1
+		break
+
+	case Mode_Accumulator:
+		address = 0
+		break
+
+	case Mode_Implied:
+		address = 0
+		break
+
+	case Mode_Relative: //Crazy one
+		bb := uint16(self.Memory[self.PC+1])
+		//if number >128, then its negative, mimicing signed byte. Minus 128 in this case
+		if bb < 128 {
+			address = self.PC + 2 + bb
+		} else {
+			address = self.PC + 2 + bb - 128
+		}
+		break
+	case Mode_ZeroPage: //Read only one one byte refference as 16 bit
+		address = uint16(self.Memory[self.PC+1])
+		break
+
+	case Mode_ZeroPageX:
+		address = uint16(uint16(self.Memory[self.PC+1]) + uint16(self.X))
+		break
+	case Mode_ZeroPageY:
+		address = uint16(uint16(self.Memory[self.PC+1]) + uint16(self.Y))
+		break
 	}
+	fmt.Printf("Got Address %02x", address)
 
 }
 

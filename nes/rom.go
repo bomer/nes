@@ -17,7 +17,7 @@ type RomHeader struct {
 }
 
 // Where the cartridge is read in
-//Read file in curent dir into Memory of NES CPU
+// Read file in curent dir into Memory of NES CPU
 func (self *Rom) LoadGame(filename string, cpu *Cpu) {
 	var header RomHeader
 	rom, _ := ioutil.ReadFile(filename)
