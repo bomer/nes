@@ -1,7 +1,7 @@
 package nes_test
 
 import (
-	"fmt"
+	// "fmt"
 	Nes "github.com/bomer/nes/nes"
 	"testing"
 )
@@ -10,9 +10,9 @@ var myNes Nes.Nes
 
 func TestModes(t *testing.T) {
 	// Mode_Immediate
-	fmt.Printf("Mode_Absolute %+v \n", Nes.OpTable[0x00])
+	// fmt.Printf("Mode_Absolute %+v \n", Nes.OpTable[0x00])
 	info := Nes.OpTable[0x00]
-	fmt.Printf("Mode - %s, Operation - %s \n", info.ModeString(), info.OperationString())
+	// fmt.Printf("Mode - %s, Operation - %s \n", info.ModeString(), info.OperationString())
 	if info.ModeString() != "Mode_Implied" {
 		t.Error("Wrong Mode Retrieved")
 	}

@@ -78,11 +78,13 @@ func (self *Cpu) DecodeInstruction() {
 		address = self.ReadWrappedAddress(self.ReadAddress())
 		break
 
-	// case Mode_IndirectX:
-	// 	address = self.ReadWrappedAddress(self.ReadAddress() + self.X)
+	case Mode_IndirectX:
+		address = self.ReadWrappedAddress(self.ReadAddress() + uint16(self.X))
+		break
 
-	// case Mode_IndirectY:
-	// 	address = self.ReadWrappedAddress(self.ReadAddress() + self.Y)
+	case Mode_IndirectY:
+		address = self.ReadWrappedAddress(self.ReadAddress() + uint16(self.Y))
+		break
 
 	case Mode_Immediate:
 		address = self.PC + 1
@@ -120,8 +122,9 @@ func (self *Cpu) DecodeInstruction() {
 	//Run Operation
 	self.info.RunOperation(self)
 	fmt.Println("Op Executed \n")
-	// self.PC += self.info.No_Bytes
+	self.PC += uint16(self.info.No_Bytes)
 	fmt.Println("Done with this op.... \n\n")
+	Pause()
 
 }
 
@@ -131,26 +134,20 @@ func (self *Cpu) loadRom() {
 }
 
 func (self *Cpu) Init() {
-	fmt.Printf("Mode_Absolute %d \n", Mode_Absolute)
-	fmt.Printf("Mode_Absolute %+v \n", OpTable[0x00])
-	var i int
-	a, _ := fmt.Scanf("%d", &i)
-	fmt.Printf("%d", a)
+	// Test mode lookup table
+	// fmt.Printf("Mode_Absolute %d \n", Mode_Absolute)
+	// fmt.Printf("Mode_Absolute %+v \n", OpTable[0x00])
+	Pause()
 
-	self.PC = 0xFFFC
-	self.SP = 0x00
-	// self.loadRom()
+	self.PC = 0xFFFC - 1 //Loads back a step then reads ahead like a normal op code
+	self.PC = self.ReadAddress()
+	self.SP = 0xff
 
 }
 func (self *Cpu) EmulateCycle() {
 	self.DecodeInstruction()
 
 }
-
-// func Brk(self *Cpu) {
-// 	fmt.Println("BRK OP")
-// 	fmt.Printf("%v", self)
-// }
 
 func Adc(self *Cpu) {
 	fmt.Println("Running Op Adc")

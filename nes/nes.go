@@ -11,10 +11,16 @@ type Nes struct {
 	Rom Rom
 }
 
+func Pause() {
+	var i int
+	a, _ := fmt.Scanf("Paused.. enter to continue%d", &i)
+	fmt.Printf("%d", a)
+}
+
 //Starts NES system. This controlls the main loop and emulation of CPU Cycles
 func (nes *Nes) Init() {
+
 	nes.Cpu.Init()
-	nes.Rom.LoadGame("mario.nes", &nes.Cpu)
 	// fmt.Printf("%%", nes.Cpu.Memory) // Check to see if ROM loaded in CPU RAM
 	fmt.Println("Mario Loaded")
 	//Run emulator on another go-routine

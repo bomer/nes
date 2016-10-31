@@ -10,6 +10,8 @@ var myNes nes.Nes
 func main() {
 
 	fmt.Printf("Initing...")
+
+	myNes.Rom.LoadGame("mario.nes", &myNes.Cpu)
 	myNes.Init()
 	// myNes.Cpu
 
