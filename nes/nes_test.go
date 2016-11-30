@@ -22,13 +22,19 @@ func TestLoad(t *testing.T) {
 	}
 }
 
+// 0x78
 func TestSei(t *testing.T) {
 	// Mode_Immediate
 	Setup()
-	nes.Cpu.PC = 32768
+
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x78
+	if nes.Cpu.S != 0 {
+		t.Error("Status flag not init'd correctly")
+	}
 	nes.Cpu.EmulateCycle()
 
-	if nes.Cpu.Memory[35000] != 132 {
-		t.Error("Mario not loaded!!")
+	if nes.Cpu.S != 4 {
+		t.Error(" I Status flag not Updated correctly")
 	}
 }

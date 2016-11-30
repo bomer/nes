@@ -27,6 +27,16 @@ type Cpu struct {
 	info        OpCodeInfo //Stores information about how to read the full op code
 }
 
+func (self *Cpu) SetFlag(flag int, tovalue bool) {
+	fmt.Printf("Setting flat at positon %d to %d", flag, tovalue)
+	fmt.Printf("Before - %d", self.S)
+	//check
+	// n |= (1 << self.S)
+	self.S |= 1 << uint8(flag)
+	fmt.Printf("After - %b \n", (self.S))
+
+}
+
 func (self *Cpu) WriteMemory(address uint16, value byte) {
 	// fmt.Printf("CPU-Writing adress %02x with %d \n", address, value)
 	//TODO. Extra mapping, mirrors, etc.
@@ -290,6 +300,7 @@ func Sed(self *Cpu) {
 }
 func Sei(self *Cpu) {
 	fmt.Println("Running Op Sei")
+	self.SetFlag(Status_I, true)
 }
 func Sta(self *Cpu) {
 	fmt.Println("Running Op Sta")
