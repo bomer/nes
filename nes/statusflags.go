@@ -2,7 +2,7 @@ package nes
 
 const (
 	// _ = iota
-	// /7 6 5 4 3 2 1 0
+	//  7 6 5 4 3 2 1 0
 	//  N V   B D I Z C
 	// 0-C=Carry
 	// 1 Z=Zero Flag

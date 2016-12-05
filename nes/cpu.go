@@ -12,13 +12,13 @@ type Cpu struct {
 	A byte //Accumlator, copying to and from memory + maths fuctions
 	X byte //X Register
 	Y byte //Y Register
-	S byte //Status, 8 flags
-	//7 6 5 4 3 2 1 0
-	//Z V   B D I Z C
-	//C=Carry, Z=Zero, I=Interupt, D=Decimal,B=Brk/software interupt, V-Overflow,S=Sign, 1=negative
+	S byte //Status, 8 flags, for more info see statusflags.go file
 
 	//64 kb of memory, adressing space of 0x0000 to 0xFFFF
 	Memory [0xFFFF + 1]byte
+
+	//Address to be used for read ops
+	address uint16
 
 	RomReader Rom
 
@@ -27,6 +27,7 @@ type Cpu struct {
 	info        OpCodeInfo //Stores information about how to read the full op code
 }
 
+//Made possible by http://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit-in-c-c
 func (self *Cpu) SetFlag(flag int, tovalue bool) {
 	fmt.Printf("Setting flag at positon %d to %s", flag, tovalue)
 	fmt.Printf("Before - %b", self.S)
@@ -47,9 +48,13 @@ func (self *Cpu) WriteMemory(address uint16, value byte) {
 	self.Memory[address] = value
 }
 
-func (self *Cpu) ReadAddress() uint16 {
-	b1 := uint16(self.Memory[self.PC+1])
-	b2 := uint16(self.Memory[self.PC+2])
+func (self *Cpu) ReadAddressByte(start uint16) uint8 {
+	return uint8(self.Memory[start+1])
+}
+
+func (self *Cpu) ReadAddress(start uint16) uint16 {
+	b1 := uint16(self.Memory[start+1])
+	b2 := uint16(self.Memory[start+2])
 	fmt.Printf("Op Code %02x , B1=%02x b2=%02x", self.instruction, b1, b2)
 	address := uint16(b2)<<8 | b1
 	return address
@@ -61,6 +66,21 @@ func (self *Cpu) ReadWrappedAddress(a uint16) uint16 {
 	b2 := uint16(self.Memory[b])
 	address := uint16(b2)<<8 | b1
 	return address
+}
+
+//Check for negative & zero, common on sets +  calculations
+func (self *Cpu) CheckNZ(value byte) {
+	if value == 0 {
+		self.SetFlag(Status_Z, true)
+	} else {
+		self.SetFlag(Status_Z, false)
+	}
+	checkbit := value >> 6 & 1
+	if checkbit == 1 {
+		self.SetFlag(Status_N, true)
+	} else {
+		self.SetFlag(Status_N, false)
+	}
 }
 
 func (self *Cpu) DecodeInstruction() {
@@ -78,26 +98,26 @@ func (self *Cpu) DecodeInstruction() {
 	case Mode_Absolute:
 		// address=self.Memory
 		// abcd stored in x=34 x+1=12
-		address = self.ReadAddress()
+		address = self.ReadAddress(self.PC)
 		break
 	case Mode_AbsoluteX:
-		address = self.ReadAddress() + uint16(self.X)
+		address = self.ReadAddress(self.PC) + uint16(self.X)
 		break
 
 	case Mode_AbsoluteY:
-		address = self.ReadAddress() + uint16(self.Y)
+		address = self.ReadAddress(self.PC) + uint16(self.Y)
 		break
 
 	case Mode_Indirect: // TODO, need to do indirect_X and Y. Contains bug
-		address = self.ReadWrappedAddress(self.ReadAddress())
+		address = self.ReadWrappedAddress(self.ReadAddress(self.PC))
 		break
 
 	case Mode_IndirectX:
-		address = self.ReadWrappedAddress(self.ReadAddress() + uint16(self.X))
+		address = self.ReadWrappedAddress(self.ReadAddress(self.PC) + uint16(self.X))
 		break
 
 	case Mode_IndirectY:
-		address = self.ReadWrappedAddress(self.ReadAddress() + uint16(self.Y))
+		address = self.ReadWrappedAddress(self.ReadAddress(self.PC) + uint16(self.Y))
 		break
 
 	case Mode_Immediate:
@@ -133,6 +153,7 @@ func (self *Cpu) DecodeInstruction() {
 		break
 	}
 	fmt.Printf("Got Address %02x", address)
+	self.address = address
 	//Run Operation
 	self.info.RunOperation(self)
 	fmt.Println("Op Executed \n")
@@ -154,7 +175,7 @@ func (self *Cpu) Init() {
 	Pause()
 
 	self.PC = 0xFFFC - 1 //Loads back a step then reads ahead like a normal op code
-	self.PC = self.ReadAddress()
+	self.PC = self.ReadAddress(self.PC)
 	self.SP = 0xff
 
 }
@@ -257,8 +278,13 @@ func Jmp(self *Cpu) {
 func Jsr(self *Cpu) {
 	fmt.Println("Running Op Jsr")
 }
+
+//Load memory (M) into Accumulator
 func Lda(self *Cpu) {
 	fmt.Println("Running Op Lda")
+	self.A = self.ReadAddressByte(self.address)
+	fmt.Printf("Set Accumulator to.. %d", self.A)
+	self.CheckNZ(self.A)
 }
 func Ldx(self *Cpu) {
 	fmt.Println("Running Op Ldx")

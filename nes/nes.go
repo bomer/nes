@@ -18,7 +18,7 @@ func Pause() {
 	fmt.Printf("%d", a)
 }
 
-//Starts NES system. This controlls the main loop and emulation of CPU Cycles
+//Starts NES system. This controls the main loop and emulation of CPU Cycles
 func (nes *Nes) Init() {
 
 	nes.Cpu.Init()
