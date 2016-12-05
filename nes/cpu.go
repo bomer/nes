@@ -28,11 +28,15 @@ type Cpu struct {
 }
 
 func (self *Cpu) SetFlag(flag int, tovalue bool) {
-	fmt.Printf("Setting flat at positon %d to %d", flag, tovalue)
-	fmt.Printf("Before - %d", self.S)
+	fmt.Printf("Setting flag at positon %d to %s", flag, tovalue)
+	fmt.Printf("Before - %b", self.S)
 	//check
 	// n |= (1 << self.S)
-	self.S |= 1 << uint8(flag)
+	if tovalue {
+		self.S |= 1 << uint8(flag)
+	} else {
+		self.S &= ^(1 << uint8(flag))
+	}
 	fmt.Printf("After - %b \n", (self.S))
 
 }
@@ -201,15 +205,21 @@ func Bvs(self *Cpu) {
 }
 func Clc(self *Cpu) {
 	fmt.Println("Running Op Clc")
+	self.SetFlag(Status_C, false)
 }
+
+//Clear Decimal Flag
 func Cld(self *Cpu) {
 	fmt.Println("Running Op Cld")
+	self.SetFlag(Status_D, false)
 }
 func Cli(self *Cpu) {
 	fmt.Println("Running Op Cli")
+	self.SetFlag(Status_I, false)
 }
 func Clv(self *Cpu) {
 	fmt.Println("Running Op Clv")
+	self.SetFlag(Status_V, false)
 }
 func Cmp(self *Cpu) {
 	fmt.Println("Running Op Cmp")
@@ -292,12 +302,20 @@ func Rts(self *Cpu) {
 func Sbc(self *Cpu) {
 	fmt.Println("Running Op Sbc")
 }
-func Sec(self *Cpu) {
+
+//Set Status Flag of C - Carry Flag to on (00 10 00 00)
+func Sec(self *Cpu) { //Set Carry Flag
 	fmt.Println("Running Op Sec")
+	self.SetFlag(Status_C, true)
 }
+
+//Set Status Flag of D - Decimal Flag to on (00 00 01 00) | NOT USED IN NES
 func Sed(self *Cpu) {
 	fmt.Println("Running Op Sed")
+	self.SetFlag(Status_D, true)
 }
+
+//Set Status Flag of I - Interupt Disable to on (00 00 01 00)
 func Sei(self *Cpu) {
 	fmt.Println("Running Op Sei")
 	self.SetFlag(Status_I, true)

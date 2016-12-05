@@ -11,6 +11,7 @@ type Nes struct {
 	Rom Rom
 }
 
+//This is really a helper function that lets me manually step through op code execution one at a time
 func Pause() {
 	var i int
 	a, _ := fmt.Scanf("Paused.. enter to continue%d", &i)
