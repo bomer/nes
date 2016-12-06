@@ -6,6 +6,9 @@ import (
 	"testing"
 )
 
+//TestNES - All unit tests are written in mariographical order.
+//That is, in the order required to run Mario on my emulator
+//Except in the case where there are mutliple accumulator versions, where I did those as well
 var nes Nes.Nes
 
 func Setup() {
@@ -119,5 +122,48 @@ func TestClv(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 	if fmt.Sprintf("%b", nes.Cpu.S) != "10111111" {
 		t.Error("Overflow flag not setting Correctly!")
+	}
+}
+
+// 0xa9 - Load Accumlator into A. THis test is a precise read from the rom reset section
+func TestLda(t *testing.T) {
+	// Mode_Immediate
+	Setup()
+	nes.Cpu.PC = 32770
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.A != 16 {
+		t.Error("Failed to load into Acuumulator Value correctly")
+	}
+}
+
+// 0xa9 - Load Accumlator into X . Testing just in immediate so the next value is used, aa will read ab
+func TestLdx(t *testing.T) {
+	// Mode_Immediate
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xA2
+	nes.Cpu.Memory[0xab] = 222
+	fmt.Printf("Checking some memory %d %d %d", nes.Cpu.Memory[0xaa], nes.Cpu.Memory[0xab], nes.Cpu.Memory[0xac])
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.X != 222 {
+		t.Error("Failed to load into Register X Value correctly")
+	}
+}
+
+// 0xa9 - Load Accumlator into T. Same as above
+func TestLdy(t *testing.T) {
+	// Mode_Immediate
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xA0
+	nes.Cpu.Memory[0xab] = 222
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.Y != 222 {
+		t.Error("Failed to load into Register Y Value correctly")
 	}
 }

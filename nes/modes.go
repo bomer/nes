@@ -1,6 +1,6 @@
 package nes
 
-import "fmt"
+// import "fmt"
 
 // addressing modes
 const (
@@ -94,7 +94,6 @@ type OpCodeInfo struct {
 }
 
 func (o *OpCodeInfo) RunOperation(cpu *Cpu) {
-	fmt.Println("Running op")
 	o.Function(cpu)
 }
 

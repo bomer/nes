@@ -30,7 +30,7 @@ type Cpu struct {
 //Made possible by http://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit-in-c-c
 func (self *Cpu) SetFlag(flag int, tovalue bool) {
 	fmt.Printf("Setting flag at positon %d to %s", flag, tovalue)
-	fmt.Printf("Before - %b", self.S)
+	fmt.Printf("Before - %d", self.S)
 	//check
 	// n |= (1 << self.S)
 	if tovalue {
@@ -49,12 +49,12 @@ func (self *Cpu) WriteMemory(address uint16, value byte) {
 }
 
 func (self *Cpu) ReadAddressByte(start uint16) uint8 {
-	return uint8(self.Memory[start+1])
+	return uint8(self.Memory[start])
 }
 
 func (self *Cpu) ReadAddress(start uint16) uint16 {
-	b1 := uint16(self.Memory[start+1])
-	b2 := uint16(self.Memory[start+2])
+	b1 := uint16(self.Memory[start])
+	b2 := uint16(self.Memory[start+1])
 	fmt.Printf("Op Code %02x , B1=%02x b2=%02x", self.instruction, b1, b2)
 	address := uint16(b2)<<8 | b1
 	return address
@@ -84,9 +84,9 @@ func (self *Cpu) CheckNZ(value byte) {
 }
 
 func (self *Cpu) DecodeInstruction() {
-	fmt.Printf("About to run instruction at %d", self.PC)
+	fmt.Printf("About to run instruction at %d\n", self.PC)
 	self.instruction = self.Memory[self.PC]
-	fmt.Printf("memory val = %02x \n", self.instruction)
+	fmt.Printf("Instruction %02x \n", self.instruction)
 	self.info = OpTable[int(self.instruction)]
 	fmt.Printf("Instruction self.info %+v \n", self.info)
 	fmt.Printf("Mode - %s, Operation - %s \n", self.info.ModeString(), self.info.OperationString())
@@ -98,26 +98,26 @@ func (self *Cpu) DecodeInstruction() {
 	case Mode_Absolute:
 		// address=self.Memory
 		// abcd stored in x=34 x+1=12
-		address = self.ReadAddress(self.PC)
+		address = self.ReadAddress(self.PC + 1)
 		break
 	case Mode_AbsoluteX:
-		address = self.ReadAddress(self.PC) + uint16(self.X)
+		address = self.ReadAddress(self.PC+1) + uint16(self.X)
 		break
 
 	case Mode_AbsoluteY:
-		address = self.ReadAddress(self.PC) + uint16(self.Y)
+		address = self.ReadAddress(self.PC+1) + uint16(self.Y)
 		break
 
 	case Mode_Indirect: // TODO, need to do indirect_X and Y. Contains bug
-		address = self.ReadWrappedAddress(self.ReadAddress(self.PC))
+		address = self.ReadWrappedAddress(self.ReadAddress(self.PC + 1))
 		break
 
 	case Mode_IndirectX:
-		address = self.ReadWrappedAddress(self.ReadAddress(self.PC) + uint16(self.X))
+		address = self.ReadWrappedAddress(self.ReadAddress(self.PC+1) + uint16(self.X))
 		break
 
 	case Mode_IndirectY:
-		address = self.ReadWrappedAddress(self.ReadAddress(self.PC) + uint16(self.Y))
+		address = self.ReadWrappedAddress(self.ReadAddress(self.PC+1) + uint16(self.Y))
 		break
 
 	case Mode_Immediate:
@@ -279,18 +279,24 @@ func Jsr(self *Cpu) {
 	fmt.Println("Running Op Jsr")
 }
 
-//Load memory (M) into Accumulator
+//Load memory (M) from Address (self.address) into Accumulator
 func Lda(self *Cpu) {
 	fmt.Println("Running Op Lda")
 	self.A = self.ReadAddressByte(self.address)
-	fmt.Printf("Set Accumulator to.. %d", self.A)
+	fmt.Printf("Setting Accumulator to.. %d\n", self.A)
 	self.CheckNZ(self.A)
 }
 func Ldx(self *Cpu) {
 	fmt.Println("Running Op Ldx")
+	self.X = self.ReadAddressByte(self.address)
+	fmt.Printf("Setting X to.. %d\n", self.A)
+	self.CheckNZ(self.A)
 }
 func Ldy(self *Cpu) {
 	fmt.Println("Running Op Ldy")
+	self.Y = self.ReadAddressByte(self.address)
+	fmt.Printf("Setting Y to.. %d\n", self.A)
+	self.CheckNZ(self.A)
 }
 func Lsr(self *Cpu) {
 	fmt.Println("Running Op Lsr")
