@@ -174,7 +174,7 @@ func (self *Cpu) Init() {
 	// fmt.Printf("Mode_Absolute %+v \n", OpTable[0x00])
 	Pause()
 
-	self.PC = 0xFFFC - 1 //Loads back a step then reads ahead like a normal op code
+	self.PC = 0xFFFC //Loads back a step then reads ahead like a normal op code
 	self.PC = self.ReadAddress(self.PC)
 	self.SP = 0xff
 
