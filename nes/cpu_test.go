@@ -167,3 +167,18 @@ func TestLdy(t *testing.T) {
 		t.Error("Failed to load into Register Y Value correctly")
 	}
 }
+
+// 0x8D - Store Accumulator in Memory
+func TestSta(t *testing.T) {
+	// Mode_Immediate
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xA0
+	nes.Cpu.Memory[0xab] = 222
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.Y != 222 {
+		t.Error("Failed to load into Register Y Value correctly")
+	}
+}

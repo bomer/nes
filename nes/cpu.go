@@ -25,6 +25,8 @@ type Cpu struct {
 	//non Global items, used to track instruction info
 	instruction byte       //Current value stored at memory[pc]
 	info        OpCodeInfo //Stores information about how to read the full op code
+
+	Quiet bool //
 }
 
 //Made possible by http://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit-in-c-c
@@ -43,7 +45,9 @@ func (self *Cpu) SetFlag(flag int, tovalue bool) {
 }
 
 func (self *Cpu) WriteMemory(address uint16, value byte) {
-	// fmt.Printf("CPU-Writing adress %02x with %d \n", address, value)
+	if !self.Quiet {
+		fmt.Printf("CPU-Writing adress %02x with %d \n", address, value)
+	}
 	//TODO. Extra mapping, mirrors, etc.
 	self.Memory[address] = value
 }
@@ -75,7 +79,9 @@ func (self *Cpu) CheckNZ(value byte) {
 	} else {
 		self.SetFlag(Status_Z, false)
 	}
-	checkbit := value >> 6 & 1
+	fmt.Printf("checking 7th bit of %b", value)
+	checkbit := value >> 7 & 1
+	// checkbit := value & 128 // if 7th bit == 1
 	if checkbit == 1 {
 		self.SetFlag(Status_N, true)
 	} else {
@@ -283,20 +289,20 @@ func Jsr(self *Cpu) {
 func Lda(self *Cpu) {
 	fmt.Println("Running Op Lda")
 	self.A = self.ReadAddressByte(self.address)
-	fmt.Printf("Setting Accumulator to.. %d\n", self.A)
+	fmt.Printf("Setting Accumulator to.. %d\n (binary of %b)", self.A, self.A)
 	self.CheckNZ(self.A)
 }
 func Ldx(self *Cpu) {
 	fmt.Println("Running Op Ldx")
 	self.X = self.ReadAddressByte(self.address)
-	fmt.Printf("Setting X to.. %d\n", self.A)
-	self.CheckNZ(self.A)
+	fmt.Printf("Setting X to.. %d\n", self.X)
+	self.CheckNZ(self.X)
 }
 func Ldy(self *Cpu) {
 	fmt.Println("Running Op Ldy")
 	self.Y = self.ReadAddressByte(self.address)
-	fmt.Printf("Setting Y to.. %d\n", self.A)
-	self.CheckNZ(self.A)
+	fmt.Printf("Setting Y to.. %d\n", self.Y)
+	self.CheckNZ(self.Y)
 }
 func Lsr(self *Cpu) {
 	fmt.Println("Running Op Lsr")
@@ -352,14 +358,19 @@ func Sei(self *Cpu) {
 	fmt.Println("Running Op Sei")
 	self.SetFlag(Status_I, true)
 }
+
+// STA  Store Accumulator in Memory
 func Sta(self *Cpu) {
 	fmt.Println("Running Op Sta")
+	self.WriteMemory(self.address, self.A)
 }
 func Stx(self *Cpu) {
 	fmt.Println("Running Op Stx")
+	self.WriteMemory(self.address, self.X)
 }
 func Sty(self *Cpu) {
 	fmt.Println("Running Op Sty")
+	self.WriteMemory(self.address, self.Y)
 }
 func Tax(self *Cpu) {
 	fmt.Println("Running Op Tax")
