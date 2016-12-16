@@ -12,9 +12,11 @@ import (
 var nes Nes.Nes
 
 func Setup() {
+	nes.Cpu.Quiet = true
 	nes.Rom.LoadGame("../mario.nes", &nes.Cpu)
 	nes.Cpu.Init()
 	nes.Cpu.S = 0
+	nes.Cpu.Quiet = false
 }
 
 func TestLoad(t *testing.T) {
@@ -173,12 +175,48 @@ func TestSta(t *testing.T) {
 	// Mode_Immediate
 	Setup()
 	nes.Cpu.PC = 0xaa
-	nes.Cpu.Memory[0xaa] = 0xA0
+	nes.Cpu.A = 111
+	nes.Cpu.Memory[0xaa] = 0x8D
 	nes.Cpu.Memory[0xab] = 222
+	nes.Cpu.Memory[0xac] = 222
 
 	nes.Cpu.EmulateCycle()
 
-	if nes.Cpu.Y != 222 {
-		t.Error("Failed to load into Register Y Value correctly")
+	if nes.Cpu.Memory[0xdede] != 111 {
+		t.Error("Failed to load Memory with Accumulator Value correctly")
+	}
+}
+
+// 0x8E - Store Accumulator in Memory
+func TestStx(t *testing.T) {
+	// Mode_Immediate
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.X = 111
+	nes.Cpu.Memory[0xaa] = 0x8E
+	nes.Cpu.Memory[0xab] = 222
+	nes.Cpu.Memory[0xac] = 222
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.Memory[0xdede] != 111 {
+		t.Error("Failed to load Memory with Accumulator Value correctly")
+	}
+}
+
+// 0x8C- Store Accumulator in Memory
+func TestSty(t *testing.T) {
+	// Mode_Immediate
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Y = 111
+	nes.Cpu.Memory[0xaa] = 0x8C
+	nes.Cpu.Memory[0xab] = 222
+	nes.Cpu.Memory[0xac] = 222
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.Memory[0xdede] != 111 {
+		t.Error("Failed to load Memory with Accumulator Value correctly")
 	}
 }
