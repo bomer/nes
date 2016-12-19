@@ -350,7 +350,7 @@ BVS  Branch on Overflow Set
      --------------------------------------------
      relative      BVC oper      70    2     2**
 
-
+DONE
 CLC  Clear Carry Flag
 
      0 -> C                           N Z C I D V
@@ -360,7 +360,7 @@ CLC  Clear Carry Flag
      --------------------------------------------
      implied       CLC           18    1     2
 
-
+DONE
 CLD  Clear Decimal Mode
 
      0 -> D                           N Z C I D V
@@ -370,7 +370,7 @@ CLD  Clear Decimal Mode
      --------------------------------------------
      implied       CLD           D8    1     2
 
-
+DONE
 CLI  Clear Interrupt Disable Bit
 
      0 -> I                           N Z C I D V
@@ -380,7 +380,7 @@ CLI  Clear Interrupt Disable Bit
      --------------------------------------------
      implied       CLI           58    1     2
 
-
+DONE
 CLV  Clear Overflow Flag
 
      0 -> V                           N Z C I D V
@@ -536,7 +536,7 @@ JSR  Jump to New Location Saving Return Address
      --------------------------------------------
      absolute      JSR oper      20    3     6
 
-
+DONE
 LDA  Load Accumulator with Memory
 
      M -> A                           N Z C I D V
@@ -553,7 +553,7 @@ LDA  Load Accumulator with Memory
      (indirect,X)  LDA (oper,X)  A1    2     6
      (indirect),Y  LDA (oper),Y  B1    2     5*
 
-
+DONE
 LDX  Load Index X with Memory
 
      M -> X                           N Z C I D V
@@ -567,7 +567,7 @@ LDX  Load Index X with Memory
      absolute      LDX oper      AE    3     4
      absolute,Y    LDX oper,Y    BE    3     4*
 
-
+DONE
 LDY  Load Index Y with Memory
 
      M -> Y                           N Z C I D V
@@ -727,7 +727,7 @@ SBC  Subtract Memory from Accumulator with Borrow
      (indirect,X)  SBC (oper,X)  E1    2     6
      (indirect),Y  SBC (oper),Y  F1    2     5*
 
-
+DONE
 SEC  Set Carry Flag
 
      1 -> C                           N Z C I D V
@@ -737,7 +737,7 @@ SEC  Set Carry Flag
      --------------------------------------------
      implied       SEC           38    1     2
 
-
+DONE
 SED  Set Decimal Flag
 
      1 -> D                           N Z C I D V
@@ -747,7 +747,7 @@ SED  Set Decimal Flag
      --------------------------------------------
      implied       SED           F8    1     2
 
-
+DONE
 SEI  Set Interrupt Disable Status
 
      1 -> I                           N Z C I D V
@@ -757,7 +757,7 @@ SEI  Set Interrupt Disable Status
      --------------------------------------------
      implied       SEI           78    1     2
 
-
+DONE
 STA  Store Accumulator in Memory
 
      A -> M                           N Z C I D V
@@ -773,7 +773,7 @@ STA  Store Accumulator in Memory
      (indirect,X)  STA (oper,X)  81    2     6
      (indirect),Y  STA (oper),Y  91    2     6
 
-
+DONE
 STX  Store Index X in Memory
 
      X -> M                           N Z C I D V
@@ -785,7 +785,7 @@ STX  Store Index X in Memory
      zeropage,Y    STX oper,Y    96    2     4
      absolute      STX oper      8E    3     4
 
-
+DONE
 STY  Sore Index Y in Memory
 
      Y -> M                           N Z C I D V
@@ -797,7 +797,7 @@ STY  Sore Index Y in Memory
      zeropage,X    STY oper,X    94    2     4
      absolute      STY oper      8C    3     4
 
-
+WIP
 TAX  Transfer Accumulator to Index X
 
      A -> X                           N Z C I D V
