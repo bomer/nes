@@ -198,6 +198,8 @@ func (self *Cpu) Init() {
 	self.PC = 0xFFFC //Loads back a step then reads ahead like a normal op code
 	self.PC = self.ReadAddress(self.PC)
 	self.SP = 0xff
+	self.X = 0
+	self.Y = 0
 
 }
 func (self *Cpu) EmulateCycle() {
@@ -404,7 +406,7 @@ func Tay(self *Cpu) {
 
 //Transfer Stack Pointer into Index X
 func Tsx(self *Cpu) {
-	fmt.Println("Running Op Tsx")
+	fmt.Printf("Running Op Tsx - Copying %d to %d", self.SP, self.X)
 	self.X = self.SP
 	self.CheckNZ(self.Y)
 }

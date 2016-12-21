@@ -266,3 +266,33 @@ func TestTaY(t *testing.T) {
 		t.Error("Bady calculated Flags!")
 	}
 }
+
+// 0xBA- Transfer Accumulator to Y
+func TestTSX(t *testing.T) {
+	// Mode_Immediate
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xBA
+	nes.Cpu.SP = 222
+	nes.Cpu.Y = 5
+	//before checl
+	if nes.Cpu.Y != 5 {
+		t.Error("Failed to setup A correctly")
+	}
+	if nes.Cpu.SP != 222 {
+		t.Error("U DONE BAD")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_N) != false {
+		t.Error("Bady setup Flags!")
+	}
+
+	//Run and test
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.X != 222 {
+		t.Error("Failed to Copy SP -> Y correctly")
+	}
+
+	if nes.Cpu.GetFlag(Nes.Status_N) != false {
+		t.Error("Bady calculated Flags!")
+	}
+}
