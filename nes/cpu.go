@@ -44,6 +44,21 @@ func (self *Cpu) SetFlag(flag int, tovalue bool) {
 
 }
 
+//Made possible by http://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit-in-c-c
+func (self *Cpu) GetFlag(flag int) bool {
+	fmt.Printf("Getting flag at positon %d ", flag)
+	//check byte, will store the value of the pos like 128 or 0
+	var n byte
+
+	//Checking with logic and
+	n = self.S & (1 << uint8(flag))
+	if n == 0 {
+		return false
+	}
+	return true
+
+}
+
 func (self *Cpu) WriteMemory(address uint16, value byte) {
 	if !self.Quiet {
 		fmt.Printf("CPU-Writing adress %02x with %d \n", address, value)
@@ -372,14 +387,26 @@ func Sty(self *Cpu) {
 	fmt.Println("Running Op Sty")
 	self.WriteMemory(self.address, self.Y)
 }
+
+//TAX Transfer Accumulator into index X
 func Tax(self *Cpu) {
 	fmt.Println("Running Op Tax")
+	self.X = self.A
+	self.CheckNZ(self.X)
 }
+
+//TAY Transfer Accumulator into index Y
 func Tay(self *Cpu) {
 	fmt.Println("Running Op Tay")
+	self.Y = self.A
+	self.CheckNZ(self.Y)
 }
+
+//Transfer Stack Pointer into Index X
 func Tsx(self *Cpu) {
 	fmt.Println("Running Op Tsx")
+	self.X = self.SP
+	self.CheckNZ(self.Y)
 }
 func Txa(self *Cpu) {
 	fmt.Println("Running Op Txa")

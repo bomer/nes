@@ -220,3 +220,49 @@ func TestSty(t *testing.T) {
 		t.Error("Failed to load Memory with Accumulator Value correctly")
 	}
 }
+
+// 0xAA- Store Accumulator in Memory
+func TestTax(t *testing.T) {
+	// Mode_Immediate
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xAA
+	nes.Cpu.A = 222
+	if nes.Cpu.A != 222 {
+		t.Error("Failed to setup A correctly")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_N) == true {
+		t.Error("Bady setup Flags!")
+	}
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.X != 222 {
+		t.Error("Failed to Copy A -> X correctly")
+	}
+
+	if nes.Cpu.GetFlag(Nes.Status_N) != true {
+		t.Error("Bady calculated Flags!")
+	}
+}
+
+// 0xA8- Transfer Accumulator to Y
+func TestTaY(t *testing.T) {
+	// Mode_Immediate
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xA8
+	nes.Cpu.A = 222
+	if nes.Cpu.A != 222 {
+		t.Error("Failed to setup A correctly")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_N) == true {
+		t.Error("Bady setup Flags!")
+	}
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.Y != 222 {
+		t.Error("Failed to Copy A -> X correctly")
+	}
+
+	if nes.Cpu.GetFlag(Nes.Status_N) != true {
+		t.Error("Bady calculated Flags!")
+	}
+}
