@@ -277,7 +277,7 @@ func TestTSX(t *testing.T) {
 	nes.Cpu.Y = 5
 	//before checl
 	if nes.Cpu.Y != 5 {
-		t.Error("Failed to setup A correctly")
+		t.Error("Failed to setup Y correctly")
 	}
 	if nes.Cpu.SP != 222 {
 		t.Error("U DONE BAD")
@@ -293,6 +293,96 @@ func TestTSX(t *testing.T) {
 	}
 
 	if nes.Cpu.GetFlag(Nes.Status_N) != false {
+		t.Error("Bady calculated Flags!")
+	}
+}
+
+// 0x8A Transfer Index X to Accumulator
+func TestTXA(t *testing.T) {
+	// Mode_Immediate
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x8A
+	nes.Cpu.X = 222
+	nes.Cpu.A = 5
+	//before checl
+	if nes.Cpu.A != 5 {
+		t.Error("Failed to setup Accumulator correctly")
+	}
+	if nes.Cpu.X != 222 {
+		t.Error("U DONE BAD")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_N) != false {
+		t.Error("Bady setup Flags!")
+	}
+
+	//Run and test
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 222 {
+		t.Error("Failed to Copy X to A correctly")
+	}
+
+	if nes.Cpu.GetFlag(Nes.Status_N) != true {
+		t.Error("Bady calculated Flags!")
+	}
+}
+
+// 0x9a TXS  Transfer Index X to Stack Register
+func TestTXS(t *testing.T) {
+	// Mode_Immediate
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x9A
+	nes.Cpu.X = 222
+	nes.Cpu.SP = 5
+	//before checl
+	if nes.Cpu.SP != 5 {
+		t.Error("Failed to setup Accumulator correctly")
+	}
+	if nes.Cpu.X != 222 {
+		t.Error("U DONE BAD")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_N) != false {
+		t.Error("Bady setup Flags!")
+	}
+
+	//Run and test
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.SP != 222 {
+		t.Error("Failed to Copy X to A correctly")
+	}
+
+	if nes.Cpu.GetFlag(Nes.Status_N) != true {
+		t.Error("Bady calculated Flags!")
+	}
+}
+
+// 0x98 TYA  Transfer Index Y to Accumulator
+func TestTYA(t *testing.T) {
+	// Mode_Immediate
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x98
+	nes.Cpu.Y = 222
+	nes.Cpu.A = 5
+	//before checl
+	if nes.Cpu.A != 5 {
+		t.Error("Failed to setup Accumulator correctly")
+	}
+	if nes.Cpu.Y != 222 {
+		t.Error("U DONE BAD")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_N) != false {
+		t.Error("Bady setup Flags!")
+	}
+
+	//Run and test
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 222 {
+		t.Error("Failed to Copy X to A correctly")
+	}
+
+	if nes.Cpu.GetFlag(Nes.Status_N) != true {
 		t.Error("Bady calculated Flags!")
 	}
 }

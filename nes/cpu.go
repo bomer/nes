@@ -404,18 +404,30 @@ func Tay(self *Cpu) {
 	self.CheckNZ(self.Y)
 }
 
-//Transfer Stack Pointer into Index X
+//TSX Transfer Stack Pointer into Index X
 func Tsx(self *Cpu) {
-	fmt.Printf("Running Op Tsx - Copying %d to %d", self.SP, self.X)
+	fmt.Printf("Running Op Tsx - Copying sp:%d to x:%d", self.SP, self.X)
 	self.X = self.SP
 	self.CheckNZ(self.Y)
 }
+
+//TXA  Transfer Index X to Accumulator
 func Txa(self *Cpu) {
-	fmt.Println("Running Op Txa")
+	fmt.Println("Running Op Txa - copying x: %d to a: %d", self.X, self.A)
+	self.A = self.X
+	self.CheckNZ(self.A)
 }
+
+//TXS  Transfer Index X to Stack Register
 func Txs(self *Cpu) {
 	fmt.Println("Running Op Txs")
+	self.SP = self.X
+	self.CheckNZ(self.SP)
 }
+
+// TYA  Transfer Index Y to Accumulator
 func Tya(self *Cpu) {
 	fmt.Println("Running Op Tya")
+	self.A = self.Y
+	self.CheckNZ(self.A)
 }
