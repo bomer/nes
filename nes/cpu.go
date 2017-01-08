@@ -32,7 +32,7 @@ type Cpu struct {
 //Made possible by http://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit-in-c-c
 func (self *Cpu) SetFlag(flag int, tovalue bool) {
 	fmt.Printf("Setting flag at positon %d to %s", flag, tovalue)
-	fmt.Printf("Before - %d", self.S)
+	fmt.Printf("Before - %b", self.S)
 	//check
 	// n |= (1 << self.S)
 	if tovalue {
@@ -207,8 +207,38 @@ func (self *Cpu) EmulateCycle() {
 
 }
 
+//ADC  Add Memory to Accumulator with Carry
+//Must set Carry and Overflow Flag
 func Adc(self *Cpu) {
 	fmt.Println("Running Op Adc")
+	// A + M + C -> A, C
+	a := self.A
+	m := self.ReadAddressByte(self.address)
+	fmt.Printf("Adding a (%b) and mem(%b)", a, m)
+	var c byte = 0
+	if self.GetFlag(Status_C) {
+		c = 1
+	}
+
+	self.A = a + m + c
+	self.CheckNZ(self.A)
+
+	if int(a)+int(m)+int(c) > 0xFF { // if overflow
+		fmt.Println("CARRY Flag enabled cause > 0xff!")
+		Sec(self) //set carry flag
+	} else {
+		Clc(self) //clear carry flag
+	}
+	//if overflow, that is negative flag on when shouldnt be
+	//if only 1 of a or m had flag, but after a or the combination didnt, overflow!!
+	if (a^m)&0x80 == 0 && (a^self.A)&0x80 != 0 {
+		fmt.Println("OVERFLOW HIT!")
+		self.SetFlag(Status_V, true)
+	} else {
+		self.SetFlag(Status_V, false)
+
+	}
+
 }
 func And(self *Cpu) {
 	fmt.Println("Running Op And")

@@ -20,7 +20,6 @@ func Setup() {
 }
 
 func TestLoad(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	fmt.Printf("AAaaand%+v", nes.Cpu.Memory[35000])
 	if nes.Cpu.Memory[35000] != 132 {
@@ -30,7 +29,6 @@ func TestLoad(t *testing.T) {
 
 // 0x78
 func TestSei(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 
 	nes.Cpu.PC = 0xaa
@@ -56,7 +54,6 @@ func TestSei(t *testing.T) {
 
 // 0xF8 && 0xD8 - Set & Clear Decimale flag
 func TestSedAdnCld(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	//Set decimal flag
 	nes.Cpu.PC = 0xaa
@@ -129,7 +126,6 @@ func TestClv(t *testing.T) {
 
 // 0xa9 - Load Accumlator into A. THis test is a precise read from the rom reset section
 func TestLda(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	nes.Cpu.PC = 32770
 	nes.Cpu.EmulateCycle()
@@ -141,7 +137,6 @@ func TestLda(t *testing.T) {
 
 // 0xa9 - Load Accumlator into X . Testing just in immediate so the next value is used, aa will read ab
 func TestLdx(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.Memory[0xaa] = 0xA2
@@ -157,7 +152,6 @@ func TestLdx(t *testing.T) {
 
 // 0xa9 - Load Accumlator into T. Same as above
 func TestLdy(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.Memory[0xaa] = 0xA0
@@ -172,7 +166,6 @@ func TestLdy(t *testing.T) {
 
 // 0x8D - Store Accumulator in Memory
 func TestSta(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.A = 111
@@ -189,7 +182,6 @@ func TestSta(t *testing.T) {
 
 // 0x8E - Store Accumulator in Memory
 func TestStx(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.X = 111
@@ -206,7 +198,6 @@ func TestStx(t *testing.T) {
 
 // 0x8C- Store Accumulator in Memory
 func TestSty(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.Y = 111
@@ -223,7 +214,6 @@ func TestSty(t *testing.T) {
 
 // 0xAA- Store Accumulator in Memory
 func TestTax(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.Memory[0xaa] = 0xAA
@@ -246,7 +236,6 @@ func TestTax(t *testing.T) {
 
 // 0xA8- Transfer Accumulator to Y
 func TestTaY(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.Memory[0xaa] = 0xA8
@@ -269,7 +258,6 @@ func TestTaY(t *testing.T) {
 
 // 0xBA- Transfer Accumulator to Y
 func TestTSX(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.Memory[0xaa] = 0xBA
@@ -299,7 +287,6 @@ func TestTSX(t *testing.T) {
 
 // 0x8A Transfer Index X to Accumulator
 func TestTXA(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.Memory[0xaa] = 0x8A
@@ -329,7 +316,6 @@ func TestTXA(t *testing.T) {
 
 // 0x9a TXS  Transfer Index X to Stack Register
 func TestTXS(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.Memory[0xaa] = 0x9A
@@ -359,7 +345,6 @@ func TestTXS(t *testing.T) {
 
 // 0x98 TYA  Transfer Index Y to Accumulator
 func TestTYA(t *testing.T) {
-	// Mode_Immediate
 	Setup()
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.Memory[0xaa] = 0x98
@@ -385,4 +370,60 @@ func TestTYA(t *testing.T) {
 	if nes.Cpu.GetFlag(Nes.Status_N) != true {
 		t.Error("Bady calculated Flags!")
 	}
+}
+
+//0x69 ADC Add M To accumulator + C
+func TestADC(t *testing.T) {
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x69
+	nes.Cpu.Memory[0xab] = 100
+	nes.Cpu.A = 50
+
+	//First test, 50  + 100, a=150, overflow is true, carry false
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 150 {
+		t.Error("Failed to add 50 and 100")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_V) != true {
+		t.Error("Failed to add 50 and 100, the overflow flag came back wrong")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != false {
+		t.Error("Failed to add 50 and 100, the Carry flag came back wrong")
+	}
+
+	//Second test, 1  + 1 + c of 1, a=3, overflow is false, carry false
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xab] = 1
+	nes.Cpu.A = 1
+	nes.Cpu.SetFlag(Nes.Status_C, true)
+
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 3 {
+		t.Error("Failed to add 1 and 1 and C of 1")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_V) != false {
+		t.Error("Failed to add 1 and 1 and C of 1, the overflow flag came back wrong")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != false {
+		t.Error("Failed to add 1 and 1 and C of 1, the Carry flag came back wrong")
+	}
+
+	//Second test, 100  + 100, should equal 200..
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xab] = 200
+	nes.Cpu.A = 200
+
+	nes.Cpu.EmulateCycle()
+	fmt.Println(nes.Cpu.A)
+	if nes.Cpu.A != 144 {
+		t.Error("Failed to add 200 and 200")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_V) != false {
+		t.Error("Failed to add 200 and 200, the overflow flag came back wrong")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != true {
+		t.Error("Failed to add 200 and 200, the Carry flag came back wrong")
+	}
+
 }
