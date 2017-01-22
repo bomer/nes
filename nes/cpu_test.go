@@ -427,3 +427,66 @@ func TestADC(t *testing.T) {
 	}
 
 }
+
+//0xe9 SBC subtract M from accumulator + 1-C
+func TestSBC(t *testing.T) {
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xE9
+	nes.Cpu.Memory[0xab] = 50
+	nes.Cpu.A = 100
+	nes.Cpu.SetFlag(Nes.Status_C, true)
+
+	//First test, 50  + 100, a=150, overflow is true, carry false
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 50 {
+		t.Error("Failed to minus 100 and 50")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_V) != false {
+		t.Error("Failed to minus 100 and 50, the overflow flag came back wrong")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != true {
+		t.Error("Failed to minus 100 and 50, the Carry flag came back wrong")
+	}
+
+	//200-200=0
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xab] = 200
+	nes.Cpu.A = 200
+	nes.Cpu.SetFlag(Nes.Status_C, true)
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 0 {
+		t.Error("Failed to minus 100 and 50")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_V) != false {
+		t.Error("Failed to minus 100 and 50, the overflow flag came back wrong")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != true {
+		t.Error("Failed to minus 100 and 50, the Carry flag came back wrong")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_Z) != true {
+		t.Error("Failed to minus 100 and 50, the Carry flag came back wrong")
+	}
+
+	// 0-200=56
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xab] = 200
+	nes.Cpu.A = 0
+	nes.Cpu.SetFlag(Nes.Status_C, true)
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 56 {
+		t.Error("Failed to minus 100 and 50, got instead%d", nes.Cpu.A)
+	}
+
+	// -50 - 50 =-100
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xab] = 50
+	nes.Cpu.A = 40
+	nes.Cpu.SetFlag(Nes.Status_C, false)
+	// nes.Cpu.SetFlag(Nes.Status_N, true)
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 245 {
+		t.Error("Failed to minus 100 and 50, got instead%d", nes.Cpu.A)
+	}
+
+}

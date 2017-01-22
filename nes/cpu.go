@@ -386,6 +386,32 @@ func Rts(self *Cpu) {
 }
 func Sbc(self *Cpu) {
 	fmt.Println("Running Op Sbc")
+	// A - M - C -> A
+	a := self.A
+	m := self.ReadAddressByte(self.address)
+	fmt.Printf("subtracting a (%b) and mem(%b)", a, m)
+	var c byte = 0
+	if self.GetFlag(Status_C) {
+		c = 1
+	}
+	fmt.Printf("Before....: %d", self.A)
+	self.A = a - m - (1 - c)
+	self.CheckNZ(self.A)
+	fmt.Printf("After...: %d", self.A)
+	if int(a)-int(m)-int(1-c) >= 0 { // if overflow
+		fmt.Println("CARRY Flag enabled cause >= 0")
+		Sec(self) //set carry flag
+	} else {
+		Clc(self) //clear carry flag
+	}
+	//if overflow, that is negative flag on when shouldnt be
+	//if only 1 of a or m had flag, but after a or the combination didnt, overflow!!
+	if (a^m)&0x80 != 0 && (a^self.A)&0x80 != 0 {
+		fmt.Println("OVERFLOW HIT!")
+		self.SetFlag(Status_V, true)
+	} else {
+		self.SetFlag(Status_V, false)
+	}
 }
 
 //Set Status Flag of C - Carry Flag to on (00 10 00 00)
