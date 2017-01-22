@@ -240,8 +240,15 @@ func Adc(self *Cpu) {
 	}
 
 }
+
+//AND, AND Memory with Accumulator
+// A AND M -> A
 func And(self *Cpu) {
 	fmt.Println("Running Op And")
+	m := self.ReadAddressByte(self.address)
+	self.A &= m
+	self.CheckNZ(self.A)
+
 }
 func Asl(self *Cpu) {
 	fmt.Println("Running Op Asl")
@@ -313,8 +320,14 @@ func Dex(self *Cpu) {
 func Dey(self *Cpu) {
 	fmt.Println("Running Op Dey")
 }
+
+//EOR , Excluse OR
+// A EOR M -> A
 func Eor(self *Cpu) {
 	fmt.Println("Running Op Eor")
+	m := self.ReadAddressByte(self.address)
+	self.A ^= m
+	self.CheckNZ(self.A)
 }
 func Inc(self *Cpu) {
 	fmt.Println("Running Op Inc")
@@ -357,8 +370,14 @@ func Lsr(self *Cpu) {
 func Nop(self *Cpu) {
 	fmt.Println("Running Op Nop")
 }
+
+// ORA, Or memory with accumulator
+// A OR M -> A
 func Ora(self *Cpu) {
 	fmt.Println("Running Op Ora")
+	m := self.ReadAddressByte(self.address)
+	self.A |= m
+	self.CheckNZ(self.A)
 }
 func Pha(self *Cpu) {
 	fmt.Println("Running Op Pha")

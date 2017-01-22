@@ -490,3 +490,92 @@ func TestSBC(t *testing.T) {
 	}
 
 }
+
+//0x29 , a = AND memory and A
+func TestAND(t *testing.T) {
+	Setup()
+	nes.Cpu.PC = 0x29
+	nes.Cpu.Memory[0x29] = 0x29
+	nes.Cpu.Memory[0x2a] = 20
+	nes.Cpu.A = 4
+	nes.Cpu.SetFlag(Nes.Status_C, true)
+
+	//First test, 50  + 100, a=150, overflow is true, carry false
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 4 {
+		t.Error("Failed to and 20 and 4 = 4")
+	}
+
+	//second, 1111 &  0111, 15 7
+	nes.Cpu.PC = 0x29
+	nes.Cpu.Memory[0x29] = 0x29
+	nes.Cpu.Memory[0x2a] = 7
+	nes.Cpu.A = 15
+	nes.Cpu.SetFlag(Nes.Status_C, true)
+
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 7 {
+		t.Error("Failed to and 15 and 7 = 7")
+	}
+}
+
+//0x09 , a = OR memory and A
+func TestORA(t *testing.T) {
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x09
+	nes.Cpu.Memory[0xab] = 20
+	nes.Cpu.A = 4
+
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 20 {
+		t.Error("Failed to OR 20 and 4 = 20")
+	}
+
+	//second, 50 | 7
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x09
+	nes.Cpu.Memory[0xab] = 7
+	nes.Cpu.A = 50
+
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 55 {
+		t.Error("Failed to or 15 and 7 = 7, got %d", nes.Cpu.A)
+	}
+}
+
+//0x49 , a = OR memory and A
+func TestEOR(t *testing.T) {
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x49
+	nes.Cpu.Memory[0xab] = 20
+	nes.Cpu.A = 4
+
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 16 {
+		t.Error("Failed to OR 20 and 4 = 20, got %d", nes.Cpu.A)
+	}
+
+	//second, 50 | 7
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x49
+	nes.Cpu.Memory[0xab] = 1
+	nes.Cpu.A = 32
+
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 33 {
+		t.Error("Failed to or 15 and 7 = 7, got %d", nes.Cpu.A)
+	}
+
+	//second, 50 | 7
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x49
+	nes.Cpu.Memory[0xab] = 33
+	nes.Cpu.A = 32
+
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 1 {
+		t.Error("Failed to or 15 and 7 = 7, got %d", nes.Cpu.A)
+	}
+}
