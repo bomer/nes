@@ -579,3 +579,67 @@ func TestEOR(t *testing.T) {
 		t.Error("Failed to or 15 and 7 = 7, got %d", nes.Cpu.A)
 	}
 }
+
+//0x0A, ASL, shift left
+func TestASL(t *testing.T) {
+	Setup()
+
+	//First Test, Accumuator shift 64 to 128
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x0A
+	nes.Cpu.A = 64
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 128 {
+		t.Error("Failed, did niot shift 64 to 128")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != false {
+		t.Error("Failed, carry wrong on shift 64 to 128")
+	}
+
+	//Second Test, Accumuator shift 192 shift
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x0A
+	nes.Cpu.A = 192
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.A != 128 {
+		t.Error("Failed, did niot shift 192 to 128")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != true {
+		t.Error("Failed, carry wrong on shift 192 to 128")
+	}
+
+	//Now Memory modification ops = 0E
+	//First Test, Accumuator shift 64 to 128
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[64] = 64
+	nes.Cpu.Memory[0xaa] = 0x0E
+	nes.Cpu.Memory[0xab] = 64
+	nes.Cpu.Memory[0xac] = 0
+
+	nes.Cpu.EmulateCycle()
+	fmt.Printf("mem 0xab = %v", nes.Cpu.Memory[0xab])
+	if nes.Cpu.Memory[64] != 128 {
+		t.Error("Failed, did niot shift 64 to 128")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != false {
+		t.Error("Failed, carry wrong on shift 64 to 128")
+	}
+
+	//Now Memory modification ops = 0E
+	//First Test, Accumuator shift 64 to 128
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[64] = 192
+	nes.Cpu.Memory[0xaa] = 0x0E
+	nes.Cpu.Memory[0xab] = 64
+	nes.Cpu.Memory[0xac] = 0
+
+	nes.Cpu.EmulateCycle()
+	fmt.Printf("mem 0xab = %v", nes.Cpu.Memory[0xab])
+	if nes.Cpu.Memory[64] != 128 {
+		t.Error("Failed, did niot shift 192 to 128")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != true {
+		t.Error("Failed, carry wrong on shift 64 to 128")
+	}
+
+}

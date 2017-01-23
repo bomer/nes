@@ -109,7 +109,7 @@ func (self *Cpu) DecodeInstruction() {
 	self.instruction = self.Memory[self.PC]
 	fmt.Printf("Instruction %02x \n", self.instruction)
 	self.info = OpTable[int(self.instruction)]
-	fmt.Printf("Instruction self.info %+v \n", self.info)
+	// fmt.Printf("Instruction self.info %+v \n", self.info)
 	fmt.Printf("Mode - %s, Operation - %s \n", self.info.ModeString(), self.info.OperationString())
 
 	fmt.Printf("\n")
@@ -250,8 +250,33 @@ func And(self *Cpu) {
 	self.CheckNZ(self.A)
 
 }
+
+//ASL  Shift Left One Bit (Memory or Accumulator)
+// C <- [76543210] <- 0
 func Asl(self *Cpu) {
 	fmt.Println("Running Op Asl")
+	if self.info.Mode == Mode_Accumulator { // Interact with self.A
+		carry := self.A >> 7
+		if carry > 0 {
+			self.SetFlag(Status_C, true)
+		} else {
+			self.SetFlag(Status_C, false)
+		}
+		self.A = self.A << 1
+		self.CheckNZ(self.A)
+	} else { // Interact with memory read byte, read first, then modify, and write back
+		m := self.ReadAddressByte(self.address)
+		carry := m >> 7
+		if carry > 0 {
+			self.SetFlag(Status_C, true)
+		} else {
+			self.SetFlag(Status_C, false)
+		}
+		m = m << 1
+		self.WriteMemory(self.address, m)
+		self.CheckNZ(m)
+
+	}
 }
 func Bcc(self *Cpu) {
 	fmt.Println("Running Op Bcc")
