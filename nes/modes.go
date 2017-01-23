@@ -153,7 +153,7 @@ var OpTable = map[int]OpCodeInfo{
 	0x66: OpCodeInfo{Mode_ZeroPage, ROR, 2, 5, 0, Ror},
 	0x68: OpCodeInfo{Mode_Implied, PLA, 1, 4, 0, Pla},
 	0x69: OpCodeInfo{Mode_Immediate, ADC, 2, 2, 0, Adc},
-	0x70: OpCodeInfo{Mode_Relative, BVC, 2, 2, 1, Bvc},
+	0x70: OpCodeInfo{Mode_Relative, BVS, 2, 2, 1, Bvs},
 	0x71: OpCodeInfo{Mode_IndirectY, ADC, 2, 5, 1, Adc},
 	0x75: OpCodeInfo{Mode_ZeroPageX, ADC, 2, 4, 0, Adc},
 	0x76: OpCodeInfo{Mode_ZeroPageX, ROR, 2, 6, 0, Ror},

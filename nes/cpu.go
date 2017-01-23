@@ -155,11 +155,13 @@ func (self *Cpu) DecodeInstruction() {
 
 	case Mode_Relative: //Crazy one
 		bb := uint16(self.Memory[self.PC+1])
+		fmt.Printf("bb = %v", bb)
 		//if number >128, then its negative, mimicing signed byte. Minus 128 in this case
+		//Removed a +2 on both of these lines because we always add 2 at the end.
 		if bb < 128 {
-			address = self.PC + 2 + bb
+			address = self.PC + bb
 		} else {
-			address = self.PC + 2 + bb - 128
+			address = self.PC - (bb - 128)
 		}
 		break
 	case Mode_ZeroPage: //Read only one one byte refference as 16 bit
@@ -280,34 +282,72 @@ func Asl(self *Cpu) {
 }
 func Bcc(self *Cpu) {
 	fmt.Println("Running Op Bcc")
+	if self.GetFlag(Status_C) == false {
+		self.PC = self.address
+	}
 }
 func Bcs(self *Cpu) {
 	fmt.Println("Running Op Bcs")
+	if self.GetFlag(Status_C) == true {
+		self.PC = self.address
+	}
 }
+
+//BEQ Branch on Result Zero
 func Beq(self *Cpu) {
 	fmt.Println("Running Op Beq")
+	if self.GetFlag(Status_Z) == true {
+		self.PC = self.address
+	}
 }
+
+//TODO OH GOD WHAT IS THIS!
 func Bit(self *Cpu) {
 	fmt.Println("Running Op Bit")
 }
+
+//BMI  Branch on Result Minus
 func Bmi(self *Cpu) {
 	fmt.Println("Running Op Bmi")
+	if self.GetFlag(Status_N) == true {
+		self.PC = self.address
+	}
 }
+
+//BNE  Branch on Result not Zero
 func Bne(self *Cpu) {
 	fmt.Println("Running Op Bne")
+	if self.GetFlag(Status_Z) == false {
+		self.PC = self.address
+	}
 }
+
+// BPL  Branch on Result Plus
 func Bpl(self *Cpu) {
 	fmt.Println("Running Op Bpl")
+	if self.GetFlag(Status_N) == false {
+		self.PC = self.address
+	}
 }
 func Brk(self *Cpu) {
 	fmt.Println("Running Op Brk, cpu info  - ")
 	fmt.Printf("%+v", self.info)
 }
+
+// BVC  Branch on Overflow Clear
 func Bvc(self *Cpu) {
 	fmt.Println("Running Op Bvc")
+	if self.GetFlag(Status_V) == false {
+		self.PC = self.address
+	}
 }
+
+// BVS  Branch on Overflow Set
 func Bvs(self *Cpu) {
 	fmt.Println("Running Op Bvs")
+	if self.GetFlag(Status_V) == true {
+		self.PC = self.address
+	}
 }
 func Clc(self *Cpu) {
 	fmt.Println("Running Op Clc")

@@ -643,3 +643,198 @@ func TestASL(t *testing.T) {
 	}
 
 }
+
+//0x90 Branch on Carry Clear
+func TestBCC(t *testing.T) {
+	Setup()
+	//0x50 (80), increment by 8.
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0x90
+	nes.Cpu.Memory[0x51] = 8
+	nes.Cpu.SetFlag(Nes.Status_C, false)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+	}
+
+	//0x50 (80), increment by 8, but with carry on, so should only go +2
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0x90
+	nes.Cpu.Memory[0x51] = 8
+	nes.Cpu.SetFlag(Nes.Status_C, true)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.PC != 82 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+	}
+
+	//0x50 (80), increment by 200, negative number (-72)
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0x90
+	nes.Cpu.Memory[0x51] = 200
+	nes.Cpu.SetFlag(Nes.Status_C, false)
+
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.PC != 10 { //80 -72(=8) + 2=10 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC by offset of -72, got %d", nes.Cpu.PC)
+	}
+	//0x50 (80), DONT with negative number
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0x90
+	nes.Cpu.Memory[0x51] = 200
+	nes.Cpu.SetFlag(Nes.Status_C, true)
+
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.PC != 82 { //80 -72(=8) + 2=10 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC negative, got %d", nes.Cpu.PC)
+	}
+}
+
+//0xB0 Branch on Carry Set
+func TestBCS(t *testing.T) {
+	Setup()
+	//0x50 (80), increment by 8.
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0xB0
+	nes.Cpu.Memory[0x51] = 8
+	nes.Cpu.SetFlag(Nes.Status_C, true)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+	}
+
+	//0x50 (80), increment by 8, but with carry on, so should only go +2
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0xB0
+	nes.Cpu.Memory[0x51] = 8
+	nes.Cpu.SetFlag(Nes.Status_C, false)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.PC != 82 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+	}
+
+	//0x50 Move backwards, with negative number (-72, 200 in signed range)
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0xB0
+	nes.Cpu.Memory[0x51] = 200
+	nes.Cpu.SetFlag(Nes.Status_C, true)
+
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.PC != 10 { //80 -72(=8) + 2=10 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC by offset of -72, got %d", nes.Cpu.PC)
+	}
+
+	//0x50 (80), Dont increment by 200, negative number (-72), only go 2 up
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0xB0
+	nes.Cpu.Memory[0x51] = 200
+	nes.Cpu.SetFlag(Nes.Status_C, false)
+
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.PC != 82 { //80 -72(=8) + 2=10 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC by offset of -72, got %d", nes.Cpu.PC)
+	}
+}
+
+//0xB0 Branch on Carry Set
+func TestBEQ(t *testing.T) {
+	Setup()
+	//0x50 (80), increment by 8.
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0xF0
+	nes.Cpu.Memory[0x51] = 8
+	nes.Cpu.SetFlag(Nes.Status_Z, true)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+	}
+}
+
+//0x30 BMI  Branch on Result Minus
+func TestBMI(t *testing.T) {
+	Setup()
+	//0x50 (80), increment by 8.
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0x30
+	nes.Cpu.Memory[0x51] = 8
+	nes.Cpu.SetFlag(Nes.Status_N, true)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+	}
+}
+
+//0xD0 BNE  Branch on Result not Zero
+func TestBNE(t *testing.T) {
+	Setup()
+	//0x50 (80), increment by 8.
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0xD0
+	nes.Cpu.Memory[0x51] = 8
+	nes.Cpu.SetFlag(Nes.Status_N, true)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+	}
+}
+
+//0x10 BPL  Branch on Result Plus
+func TestBPL(t *testing.T) {
+	Setup()
+	//0x50 (80), increment by 8.
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0x10
+	nes.Cpu.Memory[0x51] = 8
+	nes.Cpu.SetFlag(Nes.Status_N, false)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+	}
+}
+
+//0x50 BVC  Branch on Overflow Clear
+func TestBVC(t *testing.T) {
+	Setup()
+	//0x50 (80), increment by 8.
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0x50
+	nes.Cpu.Memory[0x51] = 8
+	nes.Cpu.SetFlag(Nes.Status_V, false)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+	}
+}
+
+//0x70 BVS  Branch on Overflow Set
+func TestBvs(t *testing.T) {
+	Setup()
+	//0x50 (80), increment by 8.
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0x70
+	nes.Cpu.Memory[0x51] = 8
+	nes.Cpu.SetFlag(Nes.Status_V, true)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+	}
+}
