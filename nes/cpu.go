@@ -491,6 +491,7 @@ func Pha(self *Cpu) {
 }
 func Php(self *Cpu) {
 	fmt.Println("Running Op Php")
+	self.Push(self.S)
 }
 func Pla(self *Cpu) {
 	fmt.Println("Running Op Pla")
@@ -498,6 +499,7 @@ func Pla(self *Cpu) {
 }
 func Plp(self *Cpu) {
 	fmt.Println("Running Op Plp")
+	self.S = self.Pull()
 }
 func Rol(self *Cpu) {
 	fmt.Println("Running Op Rol")

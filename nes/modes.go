@@ -127,7 +127,7 @@ var OpTable = map[int]OpCodeInfo{
 	0x24: OpCodeInfo{Mode_ZeroPage, BIT, 2, 3, 0, Bit},
 	0x25: OpCodeInfo{Mode_ZeroPage, AND, 2, 3, 0, And},
 	0x26: OpCodeInfo{Mode_ZeroPage, ROL, 2, 5, 0, Rol},
-	0x28: OpCodeInfo{Mode_Implied, PHP, 1, 4, 0, Php},
+	0x28: OpCodeInfo{Mode_Implied, PLP, 1, 4, 0, Plp},
 	0x29: OpCodeInfo{Mode_Immediate, AND, 2, 2, 0, And},
 	0x30: OpCodeInfo{Mode_Relative, BMI, 2, 2, 1, Bmi},
 	0x31: OpCodeInfo{Mode_IndirectY, AND, 2, 5, 1, And},

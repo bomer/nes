@@ -935,7 +935,7 @@ func TestINY(t *testing.T) {
 	}
 }
 
-//0x48 and 0x 68
+//0x48, PHA, push A. and 0x68, PULL A
 func TestPHAandPLA(t *testing.T) {
 	Setup()
 	//Push 3 numbers into stack, then pop them off. 50, 60, 70. then, pop back
@@ -970,5 +970,43 @@ func TestPHAandPLA(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 50 { //80 + 8 + 2 (always add to to PC, pass or fail)
 		t.Error("Failed to Pull memory 5, got %d", nes.Cpu.A)
+	}
+}
+
+//0x08, PHP, push A. and 0x28, PULL A
+func TestPHPandPLP(t *testing.T) {
+	Setup()
+	//Push 3 numbers into stack, then pop them off. 50, 60, 70. then, pop back
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x08
+	nes.Cpu.Memory[0xab] = 0x08
+	nes.Cpu.Memory[0xac] = 0x08
+
+	nes.Cpu.Memory[0xad] = 0x28
+	nes.Cpu.Memory[0xae] = 0x28
+	nes.Cpu.Memory[0xaf] = 0x28
+
+	nes.Cpu.S = 50
+	nes.Cpu.EmulateCycle()
+	nes.Cpu.S = 60
+	nes.Cpu.EmulateCycle()
+	nes.Cpu.S = 70
+	nes.Cpu.EmulateCycle()
+	nes.Cpu.S = 80 //set to 80, but dont push it into stack
+
+	if nes.Cpu.S != 80 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Stack setup wrong")
+	}
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.S != 70 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to Pull memory 7, got %d", nes.Cpu.S)
+	}
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.S != 60 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to Pull memory 6, got %d", nes.Cpu.S)
+	}
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.S != 50 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to Pull memory 5, got %d", nes.Cpu.S)
 	}
 }
