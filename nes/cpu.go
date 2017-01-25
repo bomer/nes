@@ -87,6 +87,19 @@ func (self *Cpu) ReadWrappedAddress(a uint16) uint16 {
 	return address
 }
 
+func (self *Cpu) Push(value byte) {
+	pos := uint16(0x100) + uint16(self.SP)
+	self.WriteMemory(pos, value)
+	self.SP--
+}
+
+func (self *Cpu) Pull() byte {
+	self.SP++
+	pos := uint16(0x100) + uint16(self.SP)
+	ret := self.ReadAddressByte(pos)
+	return ret
+}
+
 //Check for negative & zero, common on sets +  calculations
 func (self *Cpu) CheckNZ(value byte) {
 	if value == 0 {
@@ -474,12 +487,14 @@ func Ora(self *Cpu) {
 }
 func Pha(self *Cpu) {
 	fmt.Println("Running Op Pha")
+	self.Push(self.A)
 }
 func Php(self *Cpu) {
 	fmt.Println("Running Op Php")
 }
 func Pla(self *Cpu) {
 	fmt.Println("Running Op Pla")
+	self.A = self.Pull()
 }
 func Plp(self *Cpu) {
 	fmt.Println("Running Op Plp")
