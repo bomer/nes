@@ -376,14 +376,28 @@ func Cpx(self *Cpu) {
 func Cpy(self *Cpu) {
 	fmt.Println("Running Op Cpy")
 }
+
+//DEC  Decrement Memory by One
 func Dec(self *Cpu) {
 	fmt.Println("Running Op Dec")
+	m := self.ReadAddressByte(self.address)
+	m--
+	self.WriteMemory(self.address, m)
+	self.CheckNZ(m)
 }
+
+//DEX  Decrement Index X by One
 func Dex(self *Cpu) {
 	fmt.Println("Running Op Dex")
+	self.X--
+	self.CheckNZ(self.X)
 }
+
+//DEY  Decrement Index Y by One
 func Dey(self *Cpu) {
 	fmt.Println("Running Op Dey")
+	self.Y--
+	self.CheckNZ(self.Y)
 }
 
 //EOR , Excluse OR
@@ -394,14 +408,28 @@ func Eor(self *Cpu) {
 	self.A ^= m
 	self.CheckNZ(self.A)
 }
+
+//INC  Increment Memory by One
 func Inc(self *Cpu) {
 	fmt.Println("Running Op Inc")
+	m := self.ReadAddressByte(self.address)
+	m++
+	self.WriteMemory(self.address, m)
+	self.CheckNZ(m)
 }
+
+// INX  Increment X Reg by One
 func Inx(self *Cpu) {
 	fmt.Println("Running Op Inx")
+	self.X++
+	self.CheckNZ(self.X)
 }
+
+//INY  Increment Y Reg by One
 func Iny(self *Cpu) {
 	fmt.Println("Running Op Iny")
+	self.Y++
+	self.CheckNZ(self.Y)
 }
 func Jmp(self *Cpu) {
 	fmt.Println("Running Op Jmp")

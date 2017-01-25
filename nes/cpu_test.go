@@ -838,3 +838,99 @@ func TestBvs(t *testing.T) {
 		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
 	}
 }
+
+//C6 DEC  Decrement Memory by One
+func TestDEC(t *testing.T) {
+	Setup()
+	//0x50 (80), increment by 8.
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xC6
+	nes.Cpu.Memory[0xab] = 100
+	nes.Cpu.Memory[100] = 100
+	nes.Cpu.SetFlag(Nes.Status_V, true)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.Memory[100] != 99 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to DEC memory, got %d", nes.Cpu.Memory[100])
+	}
+}
+
+//C6 DEX  Decrement X by One
+func TestDEX(t *testing.T) {
+	Setup()
+	//0x50 (80), increment by 8.
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xCA
+	nes.Cpu.X = 100
+	nes.Cpu.SetFlag(Nes.Status_V, true)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.X != 99 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to DEC memory, got %d", nes.Cpu.X)
+	}
+}
+
+//88 DEX  Decrement Y by One
+func TestDEY(t *testing.T) {
+	Setup()
+	//0x50 (80), increment by 8.
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x88
+	nes.Cpu.Y = 100
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.Y != 99 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to DEC memory, got %d", nes.Cpu.Y)
+	}
+}
+
+//0xE6 INC  Increment Memory by One
+func TestINC(t *testing.T) {
+	Setup()
+	//Memory goes from 100 to 101
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xE6
+	nes.Cpu.Memory[0xab] = 100
+	nes.Cpu.Memory[100] = 100
+	nes.Cpu.SetFlag(Nes.Status_V, true)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.Memory[100] != 101 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to INC memory, got %d", nes.Cpu.Memory[100])
+	}
+}
+
+//0xE8 INX  Increment X by One
+func TestINX(t *testing.T) {
+	Setup()
+	//Memory goes from 100 to 101
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xE8
+	nes.Cpu.X = 100
+	nes.Cpu.SetFlag(Nes.Status_V, true)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.X != 101 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to INC memory, got %d", nes.Cpu.X)
+	}
+}
+
+//0xC8 INY  Increment Y by One
+func TestINT(t *testing.T) {
+	Setup()
+	//Memory goes from 100 to 101
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xC8
+	nes.Cpu.Y = 100
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.Y != 101 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Error("Failed to INC memory, got %d", nes.Cpu.Y)
+	}
+}
