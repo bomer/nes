@@ -1010,3 +1010,35 @@ func TestPHPandPLP(t *testing.T) {
 		t.Error("Failed to Pull memory 5, got %d", nes.Cpu.S)
 	}
 }
+
+//0x4A,  Logical Shift Right
+func TestLSR(t *testing.T) {
+	Setup()
+	//Test 13 becomes...6 1101 > 0110 (carry on)
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x4A
+	nes.Cpu.A = 13
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.A != 6 {
+		t.Error("Failed to Shift A right, got %d", nes.Cpu.A)
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != true {
+		t.Error("Failed to Shift A right, wrong carry set")
+	}
+	//Test 2, 8 becomes 4, 1000 > 0100 (carry off)
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x46
+	nes.Cpu.Memory[0xab] = 0xac
+	nes.Cpu.Memory[0xac] = 8
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.Memory[0xac] != 4 {
+		t.Error("Failed to Shift A right, got %d", nes.Cpu.A)
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != false {
+		t.Error("Failed to Shift A right, wrong carry set")
+	}
+}

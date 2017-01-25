@@ -290,7 +290,6 @@ func Asl(self *Cpu) {
 		m = m << 1
 		self.WriteMemory(self.address, m)
 		self.CheckNZ(m)
-
 	}
 }
 func Bcc(self *Cpu) {
@@ -472,9 +471,32 @@ func Ldy(self *Cpu) {
 }
 func Lsr(self *Cpu) {
 	fmt.Println("Running Op Lsr")
+	if self.info.Mode == Mode_Accumulator { // Interact with self.A
+		carry := self.A & 1 //Firt Bit, captured before hand and saved into carry flag.
+		if carry > 0 {
+			self.SetFlag(Status_C, true)
+		} else {
+			self.SetFlag(Status_C, false)
+		}
+		self.A = self.A >> 1
+		self.CheckNZ(self.A)
+	} else { // Interact with memory read byte, read first, then modify, and write back
+		m := self.ReadAddressByte(self.address)
+		fmt.Printf("Read %v, contians %v, result should be %v", self.address, m, m>>1)
+		carry := m & 1
+		if carry > 0 {
+			self.SetFlag(Status_C, true)
+		} else {
+			self.SetFlag(Status_C, false)
+		}
+		m = m >> 1
+		self.WriteMemory(self.address, m)
+		self.CheckNZ(m)
+	}
 }
 func Nop(self *Cpu) {
 	fmt.Println("Running Op Nop")
+	fmt.Println("Doing nothing. Fucken Spot on Darryl.")
 }
 
 // ORA, Or memory with accumulator
