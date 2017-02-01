@@ -1076,3 +1076,15 @@ func TestJmpJsrAndPull(t *testing.T) {
 	}
 
 }
+
+// 0xEA, NOP DO NOTHING
+func TestNOP(t *testing.T) {
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xEA
+
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.PC != 0xAB {
+		t.Error("You failed to do NOTHING. good job. No wonder the op code is EA.")
+	}
+}
