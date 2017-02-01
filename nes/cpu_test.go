@@ -1088,3 +1088,18 @@ func TestNOP(t *testing.T) {
 		t.Error("You failed to do NOTHING. good job. No wonder the op code is EA.")
 	}
 }
+
+//0x00
+func TestBRK(t *testing.T) {
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x00
+
+	nes.Cpu.EmulateCycle()
+
+	fmt.Printf("Checking %02x %02x ", nes.Cpu.Memory[0xFFFF], nes.Cpu.Memory[0xFFFE])
+
+	if nes.Cpu.PC != 0xFFF1 {
+		t.Errorf("Should moved to %02x", nes.Cpu.PC)
+	}
+}

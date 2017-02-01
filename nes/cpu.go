@@ -358,9 +358,17 @@ func Bpl(self *Cpu) {
 		self.PC = self.address
 	}
 }
+
+// BRK - Force Interupt
+// push PC+2, push SR
 func Brk(self *Cpu) {
 	fmt.Println("Running Op Brk, cpu info  - ")
 	fmt.Printf("%+v", self.info)
+	self.Push16Bit(self.PC)
+	Php(self)
+	Sei(self)
+	self.PC = self.ReadAddress(0xFFFE)
+
 }
 
 // BVC  Branch on Overflow Clear
@@ -532,10 +540,14 @@ func Ora(self *Cpu) {
 	self.A |= m
 	self.CheckNZ(self.A)
 }
+
+//PHA  Push Accumulator on Stack
 func Pha(self *Cpu) {
 	fmt.Println("Running Op Pha")
 	self.Push(self.A)
 }
+
+//PHP -  Push Processor Status on Stack
 func Php(self *Cpu) {
 	fmt.Println("Running Op Php")
 	self.Push(self.S)
