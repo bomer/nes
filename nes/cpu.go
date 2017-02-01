@@ -93,10 +93,27 @@ func (self *Cpu) Push(value byte) {
 	self.SP--
 }
 
+//Push16 bit. Push a unsigned 16 bit integer into the stack.
+func (self *Cpu) Push16Bit(value uint16) {
+	low := value & 0xff
+	high := value >> 8 //push back 8 bits to the front
+	self.Push(byte(high))
+	self.Push(byte(low))
+}
+
 func (self *Cpu) Pull() byte {
 	self.SP++
 	pos := uint16(0x100) + uint16(self.SP)
 	ret := self.ReadAddressByte(pos)
+	return ret
+}
+func (self *Cpu) Pull16Bit() uint16 {
+	low := uint16(self.Pull())
+	high := uint16(self.Pull())
+	fmt.Printf("low - %02x , high - %02x ", low, high)
+	fmt.Printf(" high << %02x ", high<<4)
+	ret := high<<4 | low
+
 	return ret
 }
 
@@ -443,11 +460,19 @@ func Iny(self *Cpu) {
 	self.Y++
 	self.CheckNZ(self.Y)
 }
+
+//JMP  Jump to new location
 func Jmp(self *Cpu) {
 	fmt.Println("Running Op Jmp")
+	self.PC = self.address
+
 }
+
+//JSR  Jump and Store Current Position``
 func Jsr(self *Cpu) {
 	fmt.Println("Running Op Jsr")
+	self.Push16Bit(self.PC - 1) //-1 because uses 3 bytes so it moves PC +3 already.
+	self.PC = self.address
 }
 
 //Load memory (M) from Address (self.address) into Accumulator
@@ -532,8 +557,13 @@ func Ror(self *Cpu) {
 func Rti(self *Cpu) {
 	fmt.Println("Running Op Rti")
 }
+
+//RTS  Return from Subroutine
+// pull PC, PC+1 -> PC
 func Rts(self *Cpu) {
 	fmt.Println("Running Op Rts")
+	self.PC = self.Pull16Bit() + 1
+
 }
 func Sbc(self *Cpu) {
 	fmt.Println("Running Op Sbc")

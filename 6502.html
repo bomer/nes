@@ -514,7 +514,7 @@ INY  Increment Index Y by One
      --------------------------------------------
      implied       INY           C8    1     2
 
-
+DONE
 JMP  Jump to New Location
 
      (PC+1) -> PCL                    N Z C I D V
@@ -525,7 +525,7 @@ JMP  Jump to New Location
      absolute      JMP oper      4C    3     3
      indirect      JMP (oper)    6C    3     5
 
-
+DONE
 JSR  Jump to New Location Saving Return Address
 
      push (PC+2),                     N Z C I D V
@@ -581,7 +581,7 @@ LDY  Load Index Y with Memory
      absolute      LDY oper      AC    3     4
      absolute,X    LDY oper,X    BC    3     4*
 
-
+DONE
 LSR  Shift One Bit Right (Memory or Accumulator)
 
      0 -> [76543210] -> C             N Z C I D V
@@ -700,7 +700,7 @@ RTI  Return from Interrupt
      --------------------------------------------
      implied       RTI           40    1     6
 
-
+DONE
 RTS  Return from Subroutine
 
      pull PC, PC+1 -> PC              N Z C I D V

@@ -1042,3 +1042,37 @@ func TestLSR(t *testing.T) {
 		t.Error("Failed to Shift A right, wrong carry set")
 	}
 }
+
+// 0x4C, JUMP
+func TestJmpJsrAndPull(t *testing.T) {
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x4C
+	nes.Cpu.Memory[0xab] = 0xba
+	nes.Cpu.Memory[0xac] = 0x00
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.PC != 0xbd { //possible should be 0xbb.. not sure, if wrong, minus 2 from PC after setting
+		t.Error("Failed to JMP to 0xbb got instead %v", nes.Cpu.PC)
+		fmt.Printf("in hex %02x", nes.Cpu.PC)
+	}
+
+	//Now test JSR, store and jump 0x20
+	nes.Cpu.Memory[0xbd] = 0x20
+	nes.Cpu.Memory[0xbe] = 0xaa
+	nes.Cpu.Memory[0xbf] = 0x00
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.PC != 0xad {
+		t.Error("Failed to JMP to 0xbb got instead %v", nes.Cpu.PC)
+		fmt.Printf("in hex %02x", nes.Cpu.PC)
+	}
+	//Now Jump back to bd - RTS 0x60
+	nes.Cpu.Memory[0xad] = 0x60
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.PC != 0xbe {
+		t.Error("Failed to RTS to 0xbb got instead %v", nes.Cpu.PC)
+		fmt.Printf("in hex %02x", nes.Cpu.PC)
+	}
+
+}
