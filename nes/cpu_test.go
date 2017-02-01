@@ -1089,17 +1089,32 @@ func TestNOP(t *testing.T) {
 	}
 }
 
-//0x00
+//0x00 BRK and RTI
 func TestBRK(t *testing.T) {
 	Setup()
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.Memory[0xaa] = 0x00
+	nes.Cpu.S = 11
 
 	nes.Cpu.EmulateCycle()
 
 	fmt.Printf("Checking %02x %02x ", nes.Cpu.Memory[0xFFFF], nes.Cpu.Memory[0xFFFE])
 
 	if nes.Cpu.PC != 0xFFF1 {
+		t.Errorf("Should moved to %02x", nes.Cpu.PC)
+	}
+
+	//NOW RTI
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x40
+	nes.Cpu.S = 0
+
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.S != 11 {
+		t.Errorf("Did not restore S", nes.Cpu.PC)
+	}
+
+	if nes.Cpu.PC != 0xab {
 		t.Errorf("Should moved to %02x", nes.Cpu.PC)
 	}
 }

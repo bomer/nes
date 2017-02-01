@@ -566,8 +566,13 @@ func Rol(self *Cpu) {
 func Ror(self *Cpu) {
 	fmt.Println("Running Op Ror")
 }
+
+//RTI - Return from Interupt
+// pull SR, pull PC
 func Rti(self *Cpu) {
 	fmt.Println("Running Op Rti")
+	self.S = self.Pull()
+	self.PC = self.Pull16Bit()
 }
 
 //RTS  Return from Subroutine
