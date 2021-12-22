@@ -135,7 +135,7 @@ func (self *Cpu) CheckNZ(value byte) {
 }
 
 func (self *Cpu) DecodeInstruction() {
-	fmt.Printf("About to run instruction at %d\n", self.PC)
+	fmt.Printf("About to run instruction at %04x\n", self.PC)
 	self.instruction = self.Memory[self.PC]
 	fmt.Printf("Instruction %02x \n", self.instruction)
 	self.info = OpTable[int(self.instruction)]
@@ -184,16 +184,13 @@ func (self *Cpu) DecodeInstruction() {
 		break
 
 	case Mode_Relative: //Crazy one
-		bb := uint16(self.Memory[self.PC+1])
-		fmt.Printf("bb = %v", bb)
-		//if number >128, then its negative, mimicing signed byte. Minus 128 in this case
-		//Removed a +2 on both of these lines because we always add 2 at the end.
-		if bb < 128 {
-			address = self.PC + bb
+		offset := uint16(self.Memory[self.PC+1])
+		if offset < 0x80 {
+			address = self.PC + 2 + offset
 		} else {
-			address = self.PC - (bb - 128)
+			address = self.PC + 2 + offset - 0x100
 		}
-		break
+		
 	case Mode_ZeroPage: //Read only one one byte refference as 16 bit
 		address = uint16(self.Memory[self.PC+1])
 		break
@@ -206,13 +203,15 @@ func (self *Cpu) DecodeInstruction() {
 		break
 	}
 	fmt.Printf("Got Address %02x", address)
+	
+	//Moving Increnement PC before??
+	self.PC += uint16(self.info.No_Bytes)
 	self.address = address
 	//Run Operation
 	self.info.RunOperation(self)
 	fmt.Println("Op Executed \n")
-	self.PC += uint16(self.info.No_Bytes)
 	fmt.Println("Done with this op.... \n\n")
-	Pause()
+	// Pause()
 
 }
 
@@ -229,7 +228,7 @@ func (self *Cpu) Init() {
 
 	self.PC = 0xFFFC //Loads back a step then reads ahead like a normal op code
 	self.PC = self.ReadAddress(self.PC)
-	self.SP = 0xff
+	self.SP = 0xfD
 	self.X = 0
 	self.Y = 0
 
@@ -487,7 +486,7 @@ func Jsr(self *Cpu) {
 func Lda(self *Cpu) {
 	fmt.Println("Running Op Lda")
 	self.A = self.ReadAddressByte(self.address)
-	fmt.Printf("Setting Accumulator to.. %d\n (binary of %b)", self.A, self.A)
+	fmt.Printf("Setting Accumulator to.. %d (hex val of %x) \n ", self.A, self.A)
 	self.CheckNZ(self.A)
 }
 func Ldx(self *Cpu) {
