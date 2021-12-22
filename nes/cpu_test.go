@@ -23,7 +23,7 @@ func TestLoad(t *testing.T) {
 	Setup()
 	fmt.Printf("AAaaand%+v", nes.Cpu.Memory[35000])
 	if nes.Cpu.Memory[35000] != 132 {
-		t.Error("Mario not loaded!!")
+		t.Errorf("Mario not loaded!!")
 	}
 }
 
@@ -34,12 +34,12 @@ func TestSei(t *testing.T) {
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.Memory[0xaa] = 0x78
 	if nes.Cpu.S != 0 {
-		t.Error("Status flag not init'd correctly")
+		t.Errorf("Status flag not init'd correctly")
 	}
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.S != 4 {
-		t.Error(" I Status flag not SET correctly")
+		t.Errorf(" I Status flag not SET correctly")
 	}
 
 	//Now Clear it
@@ -48,7 +48,7 @@ func TestSei(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.S != 0 {
-		t.Error("I Status flag not RESET correctly")
+		t.Errorf("I Status flag not RESET correctly")
 	}
 }
 
@@ -59,11 +59,11 @@ func TestSedAdnCld(t *testing.T) {
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.Memory[0xaa] = 0xF8
 	if nes.Cpu.S != 0 {
-		t.Error("Status flag not init'd correctly")
+		t.Errorf("Status flag not init'd correctly")
 	}
 	nes.Cpu.EmulateCycle()
 	if fmt.Sprintf("%b", nes.Cpu.S) != "1000" {
-		t.Error("D Status flag not setting Correctly!")
+		t.Errorf("D Status flag not setting Correctly!")
 	}
 
 	// Now Clear Decimale Flag
@@ -72,9 +72,9 @@ func TestSedAdnCld(t *testing.T) {
 
 	nes.Cpu.EmulateCycle()
 	// fmt.Printf("3--- Should go back %s.", fmt.Sprintf("d", nes.Cpu.S))
-	fmt.Printf("!!! Should go back %s ZEND", fmt.Sprintf("d", nes.Cpu.S))
+	fmt.Printf("!!! Should go back %s ZEND", fmt.Sprintf("%d", nes.Cpu.S))
 	if fmt.Sprintf("%b", nes.Cpu.S) != "0" {
-		t.Error("D Status flag not returning back to 0")
+		t.Errorf("D Status flag not returning back to 0")
 	}
 }
 
@@ -85,11 +85,11 @@ func TestSecAdnClc(t *testing.T) {
 	nes.Cpu.PC = 0xaa
 	nes.Cpu.Memory[0xaa] = 0x38
 	if nes.Cpu.S != 0 { //inital check
-		t.Error("Carry flag not init'd correctly")
+		t.Errorf("Carry flag not init'd correctly")
 	}
 	nes.Cpu.EmulateCycle()
 	if fmt.Sprintf("%b", nes.Cpu.S) != "1" {
-		t.Error("C Carry flag not setting Correctly!")
+		t.Errorf("C Carry flag not setting Correctly!")
 	}
 
 	// Now Clear Carry Flag
@@ -97,7 +97,7 @@ func TestSecAdnClc(t *testing.T) {
 	nes.Cpu.Memory[0xaa] = 0x18
 	nes.Cpu.EmulateCycle()
 	if fmt.Sprintf("%b", nes.Cpu.S) != "0" {
-		t.Error("D Carry flag not returning back to 0")
+		t.Errorf("D Carry flag not returning back to 0")
 	}
 }
 
@@ -111,7 +111,7 @@ func TestClv(t *testing.T) {
 	nes.Cpu.S = 64
 	nes.Cpu.EmulateCycle()
 	if fmt.Sprintf("%b", nes.Cpu.S) != "0" {
-		t.Error("Overflow flag not setting Correctly!")
+		t.Errorf("Overflow flag not setting Correctly!")
 	}
 	//Second scenrio for safety sake
 	nes.Cpu.PC = 0xaa
@@ -120,7 +120,7 @@ func TestClv(t *testing.T) {
 	nes.Cpu.S = 255
 	nes.Cpu.EmulateCycle()
 	if fmt.Sprintf("%b", nes.Cpu.S) != "10111111" {
-		t.Error("Overflow flag not setting Correctly!")
+		t.Errorf("Overflow flag not setting Correctly!")
 	}
 }
 
@@ -131,7 +131,7 @@ func TestLda(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.A != 16 {
-		t.Error("Failed to load into Acuumulator Value correctly")
+		t.Errorf("Failed to load into Acuumulator Value correctly")
 	}
 }
 
@@ -146,7 +146,7 @@ func TestLdx(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.X != 222 {
-		t.Error("Failed to load into Register X Value correctly")
+		t.Errorf("Failed to load into Register X Value correctly")
 	}
 }
 
@@ -160,7 +160,7 @@ func TestLdy(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.Y != 222 {
-		t.Error("Failed to load into Register Y Value correctly")
+		t.Errorf("Failed to load into Register Y Value correctly")
 	}
 }
 
@@ -176,7 +176,7 @@ func TestSta(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.Memory[0xdede] != 111 {
-		t.Error("Failed to load Memory with Accumulator Value correctly")
+		t.Errorf("Failed to load Memory with Accumulator Value correctly")
 	}
 }
 
@@ -192,7 +192,7 @@ func TestStx(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.Memory[0xdede] != 111 {
-		t.Error("Failed to load Memory with Accumulator Value correctly")
+		t.Errorf("Failed to load Memory with Accumulator Value correctly")
 	}
 }
 
@@ -208,7 +208,7 @@ func TestSty(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.Memory[0xdede] != 111 {
-		t.Error("Failed to load Memory with Accumulator Value correctly")
+		t.Errorf("Failed to load Memory with Accumulator Value correctly")
 	}
 }
 
@@ -219,18 +219,18 @@ func TestTax(t *testing.T) {
 	nes.Cpu.Memory[0xaa] = 0xAA
 	nes.Cpu.A = 222
 	if nes.Cpu.A != 222 {
-		t.Error("Failed to setup A correctly")
+		t.Errorf("Failed to setup A correctly")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_N) == true {
-		t.Error("Bady setup Flags!")
+		t.Errorf("Bady setup Flags!")
 	}
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.X != 222 {
-		t.Error("Failed to Copy A -> X correctly")
+		t.Errorf("Failed to Copy A -> X correctly")
 	}
 
 	if nes.Cpu.GetFlag(Nes.Status_N) != true {
-		t.Error("Bady calculated Flags!")
+		t.Errorf("Bady calculated Flags!")
 	}
 }
 
@@ -241,18 +241,18 @@ func TestTaY(t *testing.T) {
 	nes.Cpu.Memory[0xaa] = 0xA8
 	nes.Cpu.A = 222
 	if nes.Cpu.A != 222 {
-		t.Error("Failed to setup A correctly")
+		t.Errorf("Failed to setup A correctly")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_N) == true {
-		t.Error("Bady setup Flags!")
+		t.Errorf("Bady setup Flags!")
 	}
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.Y != 222 {
-		t.Error("Failed to Copy A -> X correctly")
+		t.Errorf("Failed to Copy A -> X correctly")
 	}
 
 	if nes.Cpu.GetFlag(Nes.Status_N) != true {
-		t.Error("Bady calculated Flags!")
+		t.Errorf("Bady calculated Flags!")
 	}
 }
 
@@ -265,23 +265,23 @@ func TestTSX(t *testing.T) {
 	nes.Cpu.Y = 5
 	//before checl
 	if nes.Cpu.Y != 5 {
-		t.Error("Failed to setup Y correctly")
+		t.Errorf("Failed to setup Y correctly")
 	}
 	if nes.Cpu.SP != 222 {
-		t.Error("U DONE BAD")
+		t.Errorf("U DONE BAD")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_N) != false {
-		t.Error("Bady setup Flags!")
+		t.Errorf("Bady setup Flags!")
 	}
 
 	//Run and test
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.X != 222 {
-		t.Error("Failed to Copy SP -> Y correctly")
+		t.Errorf("Failed to Copy SP -> Y correctly")
 	}
 
 	if nes.Cpu.GetFlag(Nes.Status_N) != false {
-		t.Error("Bady calculated Flags!")
+		t.Errorf("Bady calculated Flags!")
 	}
 }
 
@@ -294,23 +294,23 @@ func TestTXA(t *testing.T) {
 	nes.Cpu.A = 5
 	//before checl
 	if nes.Cpu.A != 5 {
-		t.Error("Failed to setup Accumulator correctly")
+		t.Errorf("Failed to setup Accumulator correctly")
 	}
 	if nes.Cpu.X != 222 {
-		t.Error("U DONE BAD")
+		t.Errorf("U DONE BAD")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_N) != false {
-		t.Error("Bady setup Flags!")
+		t.Errorf("Bady setup Flags!")
 	}
 
 	//Run and test
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 222 {
-		t.Error("Failed to Copy X to A correctly")
+		t.Errorf("Failed to Copy X to A correctly")
 	}
 
 	if nes.Cpu.GetFlag(Nes.Status_N) != true {
-		t.Error("Bady calculated Flags!")
+		t.Errorf("Bady calculated Flags!")
 	}
 }
 
@@ -323,23 +323,23 @@ func TestTXS(t *testing.T) {
 	nes.Cpu.SP = 5
 	//before checl
 	if nes.Cpu.SP != 5 {
-		t.Error("Failed to setup Accumulator correctly")
+		t.Errorf("Failed to setup Accumulator correctly")
 	}
 	if nes.Cpu.X != 222 {
-		t.Error("U DONE BAD")
+		t.Errorf("U DONE BAD")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_N) != false {
-		t.Error("Bady setup Flags!")
+		t.Errorf("Bady setup Flags!")
 	}
 
 	//Run and test
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.SP != 222 {
-		t.Error("Failed to Copy X to A correctly")
+		t.Errorf("Failed to Copy X to A correctly")
 	}
 
 	if nes.Cpu.GetFlag(Nes.Status_N) != true {
-		t.Error("Bady calculated Flags!")
+		t.Errorf("Bady calculated Flags!")
 	}
 }
 
@@ -352,23 +352,23 @@ func TestTYA(t *testing.T) {
 	nes.Cpu.A = 5
 	//before checl
 	if nes.Cpu.A != 5 {
-		t.Error("Failed to setup Accumulator correctly")
+		t.Errorf("Failed to setup Accumulator correctly")
 	}
 	if nes.Cpu.Y != 222 {
-		t.Error("U DONE BAD")
+		t.Errorf("U DONE BAD")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_N) != false {
-		t.Error("Bady setup Flags!")
+		t.Errorf("Bady setup Flags!")
 	}
 
 	//Run and test
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 222 {
-		t.Error("Failed to Copy X to A correctly")
+		t.Errorf("Failed to Copy X to A correctly")
 	}
 
 	if nes.Cpu.GetFlag(Nes.Status_N) != true {
-		t.Error("Bady calculated Flags!")
+		t.Errorf("Bady calculated Flags!")
 	}
 }
 
@@ -383,13 +383,13 @@ func TestADC(t *testing.T) {
 	//First test, 50  + 100, a=150, overflow is true, carry false
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 150 {
-		t.Error("Failed to add 50 and 100")
+		t.Errorf("Failed to add 50 and 100")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_V) != true {
-		t.Error("Failed to add 50 and 100, the overflow flag came back wrong")
+		t.Errorf("Failed to add 50 and 100, the overflow flag came back wrong")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_C) != false {
-		t.Error("Failed to add 50 and 100, the Carry flag came back wrong")
+		t.Errorf("Failed to add 50 and 100, the Carry flag came back wrong")
 	}
 
 	//Second test, 1  + 1 + c of 1, a=3, overflow is false, carry false
@@ -400,13 +400,13 @@ func TestADC(t *testing.T) {
 
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 3 {
-		t.Error("Failed to add 1 and 1 and C of 1")
+		t.Errorf("Failed to add 1 and 1 and C of 1")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_V) != false {
-		t.Error("Failed to add 1 and 1 and C of 1, the overflow flag came back wrong")
+		t.Errorf("Failed to add 1 and 1 and C of 1, the overflow flag came back wrong")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_C) != false {
-		t.Error("Failed to add 1 and 1 and C of 1, the Carry flag came back wrong")
+		t.Errorf("Failed to add 1 and 1 and C of 1, the Carry flag came back wrong")
 	}
 
 	//Second test, 100  + 100, should equal 200..
@@ -417,13 +417,13 @@ func TestADC(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 	fmt.Println(nes.Cpu.A)
 	if nes.Cpu.A != 144 {
-		t.Error("Failed to add 200 and 200")
+		t.Errorf("Failed to add 200 and 200")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_V) != false {
-		t.Error("Failed to add 200 and 200, the overflow flag came back wrong")
+		t.Errorf("Failed to add 200 and 200, the overflow flag came back wrong")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_C) != true {
-		t.Error("Failed to add 200 and 200, the Carry flag came back wrong")
+		t.Errorf("Failed to add 200 and 200, the Carry flag came back wrong")
 	}
 
 }
@@ -440,13 +440,13 @@ func TestSBC(t *testing.T) {
 	//First test, 50  + 100, a=150, overflow is true, carry false
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 50 {
-		t.Error("Failed to minus 100 and 50")
+		t.Errorf("Failed to minus 100 and 50")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_V) != false {
-		t.Error("Failed to minus 100 and 50, the overflow flag came back wrong")
+		t.Errorf("Failed to minus 100 and 50, the overflow flag came back wrong")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_C) != true {
-		t.Error("Failed to minus 100 and 50, the Carry flag came back wrong")
+		t.Errorf("Failed to minus 100 and 50, the Carry flag came back wrong")
 	}
 
 	//200-200=0
@@ -456,16 +456,16 @@ func TestSBC(t *testing.T) {
 	nes.Cpu.SetFlag(Nes.Status_C, true)
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 0 {
-		t.Error("Failed to minus 100 and 50")
+		t.Errorf("Failed to minus 100 and 50")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_V) != false {
-		t.Error("Failed to minus 100 and 50, the overflow flag came back wrong")
+		t.Errorf("Failed to minus 100 and 50, the overflow flag came back wrong")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_C) != true {
-		t.Error("Failed to minus 100 and 50, the Carry flag came back wrong")
+		t.Errorf("Failed to minus 100 and 50, the Carry flag came back wrong")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_Z) != true {
-		t.Error("Failed to minus 100 and 50, the Carry flag came back wrong")
+		t.Errorf("Failed to minus 100 and 50, the Carry flag came back wrong")
 	}
 
 	// 0-200=56
@@ -475,7 +475,7 @@ func TestSBC(t *testing.T) {
 	nes.Cpu.SetFlag(Nes.Status_C, true)
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 56 {
-		t.Error("Failed to minus 100 and 50, got instead%d", nes.Cpu.A)
+		t.Errorf("Failed to minus 100 and 50, got instead%d", nes.Cpu.A)
 	}
 
 	// -50 - 50 =-100
@@ -486,7 +486,7 @@ func TestSBC(t *testing.T) {
 	// nes.Cpu.SetFlag(Nes.Status_N, true)
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 245 {
-		t.Error("Failed to minus 100 and 50, got instead%d", nes.Cpu.A)
+		t.Errorf("Failed to minus 100 and 50, got instead%d", nes.Cpu.A)
 	}
 
 }
@@ -503,7 +503,7 @@ func TestAND(t *testing.T) {
 	//First test, 50  + 100, a=150, overflow is true, carry false
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 4 {
-		t.Error("Failed to and 20 and 4 = 4")
+		t.Errorf("Failed to and 20 and 4 = 4")
 	}
 
 	//second, 1111 &  0111, 15 7
@@ -515,7 +515,7 @@ func TestAND(t *testing.T) {
 
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 7 {
-		t.Error("Failed to and 15 and 7 = 7")
+		t.Errorf("Failed to and 15 and 7 = 7")
 	}
 }
 
@@ -529,7 +529,7 @@ func TestORA(t *testing.T) {
 
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 20 {
-		t.Error("Failed to OR 20 and 4 = 20")
+		t.Errorf("Failed to OR 20 and 4 = 20")
 	}
 
 	//second, 50 | 7
@@ -540,7 +540,7 @@ func TestORA(t *testing.T) {
 
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 55 {
-		t.Error("Failed to or 15 and 7 = 7, got %d", nes.Cpu.A)
+		t.Errorf("Failed to or 15 and 7 = 7, got %d", nes.Cpu.A)
 	}
 }
 
@@ -554,7 +554,7 @@ func TestEOR(t *testing.T) {
 
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 16 {
-		t.Error("Failed to OR 20 and 4 = 20, got %d", nes.Cpu.A)
+		t.Errorf("Failed to OR 20 and 4 = 20, got %d", nes.Cpu.A)
 	}
 
 	//second, 50 | 7
@@ -565,7 +565,7 @@ func TestEOR(t *testing.T) {
 
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 33 {
-		t.Error("Failed to or 15 and 7 = 7, got %d", nes.Cpu.A)
+		t.Errorf("Failed to or 15 and 7 = 7, got %d", nes.Cpu.A)
 	}
 
 	//second, 50 | 7
@@ -576,7 +576,7 @@ func TestEOR(t *testing.T) {
 
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 1 {
-		t.Error("Failed to or 15 and 7 = 7, got %d", nes.Cpu.A)
+		t.Errorf("Failed to or 15 and 7 = 7, got %d", nes.Cpu.A)
 	}
 }
 
@@ -590,10 +590,10 @@ func TestASL(t *testing.T) {
 	nes.Cpu.A = 64
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 128 {
-		t.Error("Failed, did niot shift 64 to 128")
+		t.Errorf("Failed, did niot shift 64 to 128")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_C) != false {
-		t.Error("Failed, carry wrong on shift 64 to 128")
+		t.Errorf("Failed, carry wrong on shift 64 to 128")
 	}
 
 	//Second Test, Accumuator shift 192 shift
@@ -602,10 +602,10 @@ func TestASL(t *testing.T) {
 	nes.Cpu.A = 192
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 128 {
-		t.Error("Failed, did niot shift 192 to 128")
+		t.Errorf("Failed, did niot shift 192 to 128")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_C) != true {
-		t.Error("Failed, carry wrong on shift 192 to 128")
+		t.Errorf("Failed, carry wrong on shift 192 to 128")
 	}
 
 	//Now Memory modification ops = 0E
@@ -619,10 +619,10 @@ func TestASL(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 	fmt.Printf("mem 0xab = %v", nes.Cpu.Memory[0xab])
 	if nes.Cpu.Memory[64] != 128 {
-		t.Error("Failed, did niot shift 64 to 128")
+		t.Errorf("Failed, did niot shift 64 to 128")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_C) != false {
-		t.Error("Failed, carry wrong on shift 64 to 128")
+		t.Errorf("Failed, carry wrong on shift 64 to 128")
 	}
 
 	//Now Memory modification ops = 0E
@@ -636,10 +636,10 @@ func TestASL(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 	fmt.Printf("mem 0xab = %v", nes.Cpu.Memory[0xab])
 	if nes.Cpu.Memory[64] != 128 {
-		t.Error("Failed, did niot shift 192 to 128")
+		t.Errorf("Failed, did niot shift 192 to 128")
 	}
 	if nes.Cpu.GetFlag(Nes.Status_C) != true {
-		t.Error("Failed, carry wrong on shift 64 to 128")
+		t.Errorf("Failed, carry wrong on shift 64 to 128")
 	}
 
 }
@@ -656,7 +656,7 @@ func TestBCC(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+		t.Errorf("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
 	}
 
 	//0x50 (80), increment by 8, but with carry on, so should only go +2
@@ -668,7 +668,7 @@ func TestBCC(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.PC != 82 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+		t.Errorf("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
 	}
 
 	//0x50 (80), increment by 200, negative number (-72)
@@ -678,8 +678,8 @@ func TestBCC(t *testing.T) {
 	nes.Cpu.SetFlag(Nes.Status_C, false)
 
 	nes.Cpu.EmulateCycle()
-	if nes.Cpu.PC != 10 { //80 -72(=8) + 2=10 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC by offset of -72, got %d", nes.Cpu.PC)
+	if nes.Cpu.PC != 26 { //80 -72(=8) + 2=10 (always add to to PC, pass or fail)
+		t.Errorf("Failed to branch PC by offset of -72, got %d", nes.Cpu.PC)
 	}
 	//0x50 (80), DONT with negative number
 	nes.Cpu.PC = 80
@@ -689,7 +689,7 @@ func TestBCC(t *testing.T) {
 
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.PC != 82 { //80 -72(=8) + 2=10 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC negative, got %d", nes.Cpu.PC)
+		t.Errorf("Failed to branch PC negative, got %d", nes.Cpu.PC)
 	}
 }
 
@@ -705,7 +705,7 @@ func TestBCS(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+		t.Errorf("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
 	}
 
 	//0x50 (80), increment by 8, but with carry on, so should only go +2
@@ -717,7 +717,7 @@ func TestBCS(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.PC != 82 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+		t.Errorf("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
 	}
 
 	//0x50 Move backwards, with negative number (-72, 200 in signed range)
@@ -727,8 +727,8 @@ func TestBCS(t *testing.T) {
 	nes.Cpu.SetFlag(Nes.Status_C, true)
 
 	nes.Cpu.EmulateCycle()
-	if nes.Cpu.PC != 10 { //80 -72(=8) + 2=10 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC by offset of -72, got %d", nes.Cpu.PC)
+	if nes.Cpu.PC != 26 { //80 -72(=8) + 2=10 (always add to to PC, pass or fail)
+		t.Errorf("Failed to branch PC by offset of -72, got %d", nes.Cpu.PC)
 	}
 
 	//0x50 (80), Dont increment by 200, negative number (-72), only go 2 up
@@ -739,7 +739,7 @@ func TestBCS(t *testing.T) {
 
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.PC != 82 { //80 -72(=8) + 2=10 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC by offset of -72, got %d", nes.Cpu.PC)
+		t.Errorf("Failed to branch PC by offset of -72, got %d", nes.Cpu.PC)
 	}
 }
 
@@ -755,7 +755,7 @@ func TestBEQ(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+		t.Errorf("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
 	}
 }
 
@@ -771,7 +771,7 @@ func TestBMI(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+		t.Errorf("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
 	}
 }
 
@@ -787,7 +787,7 @@ func TestBNE(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+		t.Errorf("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
 	}
 }
 
@@ -803,7 +803,7 @@ func TestBPL(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+		t.Errorf("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
 	}
 }
 
@@ -819,7 +819,7 @@ func TestBVC(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+		t.Errorf("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
 	}
 }
 
@@ -835,7 +835,7 @@ func TestBvs(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
+		t.Errorf("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
 	}
 }
 
@@ -852,7 +852,7 @@ func TestDEC(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.Memory[100] != 99 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to DEC memory, got %d", nes.Cpu.Memory[100])
+		t.Errorf("Failed to DEC memory, got %d", nes.Cpu.Memory[100])
 	}
 }
 
@@ -868,7 +868,7 @@ func TestDEX(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.X != 99 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to DEC memory, got %d", nes.Cpu.X)
+		t.Errorf("Failed to DEC memory, got %d", nes.Cpu.X)
 	}
 }
 
@@ -883,7 +883,7 @@ func TestDEY(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.Y != 99 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to DEC memory, got %d", nes.Cpu.Y)
+		t.Errorf("Failed to DEC memory, got %d", nes.Cpu.Y)
 	}
 }
 
@@ -900,7 +900,7 @@ func TestINC(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.Memory[100] != 101 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to INC memory, got %d", nes.Cpu.Memory[100])
+		t.Errorf("Failed to INC memory, got %d", nes.Cpu.Memory[100])
 	}
 }
 
@@ -916,7 +916,7 @@ func TestINX(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.X != 101 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to INC memory, got %d", nes.Cpu.X)
+		t.Errorf("Failed to INC memory, got %d", nes.Cpu.X)
 	}
 }
 
@@ -931,7 +931,7 @@ func TestINY(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.Y != 101 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to INC memory, got %d", nes.Cpu.Y)
+		t.Errorf("Failed to INC memory, got %d", nes.Cpu.Y)
 	}
 }
 
@@ -957,19 +957,19 @@ func TestPHAandPLA(t *testing.T) {
 	nes.Cpu.A = 80 //set to 80, but dont push it into stack
 
 	if nes.Cpu.A != 80 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Stack setup wrong")
+		t.Errorf("Stack setup wrong")
 	}
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 70 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to Pull memory 7, got %d", nes.Cpu.A)
+		t.Errorf("Failed to Pull memory 7, got %d", nes.Cpu.A)
 	}
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 60 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to Pull memory 6, got %d", nes.Cpu.A)
+		t.Errorf("Failed to Pull memory 6, got %d", nes.Cpu.A)
 	}
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 50 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to Pull memory 5, got %d", nes.Cpu.A)
+		t.Errorf("Failed to Pull memory 5, got %d", nes.Cpu.A)
 	}
 }
 
@@ -995,19 +995,19 @@ func TestPHPandPLP(t *testing.T) {
 	nes.Cpu.S = 80 //set to 80, but dont push it into stack
 
 	if nes.Cpu.S != 80 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Stack setup wrong")
+		t.Errorf("Stack setup wrong")
 	}
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.S != 70 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to Pull memory 7, got %d", nes.Cpu.S)
+		t.Errorf("Failed to Pull memory 7, got %d", nes.Cpu.S)
 	}
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.S != 60 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to Pull memory 6, got %d", nes.Cpu.S)
+		t.Errorf("Failed to Pull memory 6, got %d", nes.Cpu.S)
 	}
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.S != 50 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Error("Failed to Pull memory 5, got %d", nes.Cpu.S)
+		t.Errorf("Failed to Pull memory 5, got %d", nes.Cpu.S)
 	}
 }
 
@@ -1022,10 +1022,10 @@ func TestLSR(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.A != 6 {
-		t.Error("Failed to Shift A right, got %d", nes.Cpu.A)
+		t.Errorf("Failed to Shift A right, got %d", nes.Cpu.A)
 	}
 	if nes.Cpu.GetFlag(Nes.Status_C) != true {
-		t.Error("Failed to Shift A right, wrong carry set")
+		t.Errorf("Failed to Shift A right, wrong carry set")
 	}
 	//Test 2, 8 becomes 4, 1000 > 0100 (carry off)
 	nes.Cpu.PC = 0xaa
@@ -1036,10 +1036,10 @@ func TestLSR(t *testing.T) {
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.Memory[0xac] != 4 {
-		t.Error("Failed to Shift A right, got %d", nes.Cpu.A)
+		t.Errorf("Failed to Shift A right, got %d", nes.Cpu.A)
 	}
 	if nes.Cpu.GetFlag(Nes.Status_C) != false {
-		t.Error("Failed to Shift A right, wrong carry set")
+		t.Errorf("Failed to Shift A right, wrong carry set")
 	}
 }
 
@@ -1053,8 +1053,8 @@ func TestJmpJsrAndPull(t *testing.T) {
 
 	nes.Cpu.EmulateCycle()
 
-	if nes.Cpu.PC != 0xbd { //possible should be 0xbb.. not sure, if wrong, minus 2 from PC after setting
-		t.Error("Failed to JMP to 0xbb got instead %v", nes.Cpu.PC)
+	if nes.Cpu.PC != 0xba { //possible should be 0xbb.. not sure, if wrong, minus 2 from PC after setting
+		t.Errorf("Failed to JMP to 0xb gota instead %x", nes.Cpu.PC)
 		fmt.Printf("in hex %02x", nes.Cpu.PC)
 	}
 
@@ -1063,15 +1063,15 @@ func TestJmpJsrAndPull(t *testing.T) {
 	nes.Cpu.Memory[0xbe] = 0xaa
 	nes.Cpu.Memory[0xbf] = 0x00
 	nes.Cpu.EmulateCycle()
-	if nes.Cpu.PC != 0xad {
-		t.Error("Failed to JMP to 0xbb got instead %v", nes.Cpu.PC)
+	if nes.Cpu.PC != 0xfff0 {
+		t.Errorf("Failed to JMP to 0xbb got instead %x", nes.Cpu.PC)
 		fmt.Printf("in hex %02x", nes.Cpu.PC)
 	}
 	//Now Jump back to bd - RTS 0x60
 	nes.Cpu.Memory[0xad] = 0x60
 	nes.Cpu.EmulateCycle()
-	if nes.Cpu.PC != 0xbe {
-		t.Error("Failed to RTS to 0xbb got instead %v", nes.Cpu.PC)
+	if nes.Cpu.PC != 0xfff3 {
+		t.Errorf("Failed to RTS to 0xbb got instead %x", nes.Cpu.PC)
 		fmt.Printf("in hex %02x", nes.Cpu.PC)
 	}
 
@@ -1085,11 +1085,12 @@ func TestNOP(t *testing.T) {
 
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.PC != 0xAB {
-		t.Error("You failed to do NOTHING. good job. No wonder the op code is EA.")
+		t.Errorf("You failed to do NOTHING. good job. No wonder the op code is EA.")
 	}
 }
 
 //0x00 BRK and RTI
+// Dec 2021, Moving back PC check, after moving 
 func TestBRK(t *testing.T) {
 	Setup()
 	nes.Cpu.PC = 0xaa
@@ -1100,8 +1101,8 @@ func TestBRK(t *testing.T) {
 
 	fmt.Printf("Checking %02x %02x ", nes.Cpu.Memory[0xFFFF], nes.Cpu.Memory[0xFFFE])
 
-	if nes.Cpu.PC != 0xFFF1 {
-		t.Errorf("Should moved to %02x", nes.Cpu.PC)
+	if nes.Cpu.PC != 0xFFF0 {
+		t.Errorf("Should moved to 0xFFF1, instead was %02x", nes.Cpu.PC)
 	}
 
 	//NOW RTI
@@ -1111,10 +1112,10 @@ func TestBRK(t *testing.T) {
 
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.S != 11 {
-		t.Errorf("Did not restore S", nes.Cpu.PC)
+		t.Error("Did not restore S", nes.Cpu.PC)
 	}
 
 	if nes.Cpu.PC != 0xab {
-		t.Errorf("Should moved to %02x", nes.Cpu.PC)
+		t.Errorf("Should moved to 0xab, instead was %02x", nes.Cpu.PC)
 	}
 }

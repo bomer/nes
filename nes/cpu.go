@@ -31,7 +31,7 @@ type Cpu struct {
 
 //Made possible by http://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit-in-c-c
 func (self *Cpu) SetFlag(flag int, tovalue bool) {
-	fmt.Printf("Setting flag at positon %d to %s", flag, tovalue)
+	fmt.Printf("Setting flag at positon %d to %t", flag, tovalue)
 	fmt.Printf("Before - %b", self.S)
 	//check
 	// n |= (1 << self.S)
@@ -209,8 +209,8 @@ func (self *Cpu) DecodeInstruction() {
 	self.address = address
 	//Run Operation
 	self.info.RunOperation(self)
-	fmt.Println("Op Executed \n")
-	fmt.Println("Done with this op.... \n\n")
+	fmt.Println("Op Executed")
+	fmt.Println("Done with this op....")
 	// Pause()
 
 }
@@ -666,7 +666,7 @@ func Tsx(self *Cpu) {
 
 //TXA  Transfer Index X to Accumulator
 func Txa(self *Cpu) {
-	fmt.Println("Running Op Txa - copying x: %d to a: %d", self.X, self.A)
+	fmt.Printf("Running Op Txa - copying x: %d to a: %d\n", self.X, self.A)
 	self.A = self.X
 	self.CheckNZ(self.A)
 }
