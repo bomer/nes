@@ -190,7 +190,7 @@ func (self *Cpu) DecodeInstruction() {
 		} else {
 			address = self.PC + 2 + offset - 0x100
 		}
-		
+
 	case Mode_ZeroPage: //Read only one one byte refference as 16 bit
 		address = uint16(self.Memory[self.PC+1])
 		break
@@ -203,7 +203,7 @@ func (self *Cpu) DecodeInstruction() {
 		break
 	}
 	fmt.Printf("Got Address %02x", address)
-	
+
 	//Moving Increnement PC before??
 	self.PC += uint16(self.info.No_Bytes)
 	self.address = address

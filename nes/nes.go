@@ -9,6 +9,7 @@ import (
 type Nes struct {
 	Cpu Cpu
 	Rom Rom
+	Ppu Ppu
 }
 
 //This is really a helper function that lets me manually step through op code execution one at a time
