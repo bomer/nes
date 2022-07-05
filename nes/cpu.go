@@ -185,14 +185,13 @@ func (self *Cpu) DecodeInstruction() {
 
 	case Mode_ZeroPage: //Read only one one byte refference as 16 bit
 		address = uint16(self.Memory[self.PC+1])
-		break
 
 	case Mode_ZeroPageX:
 		address = uint16(uint16(self.Memory[self.PC+1]) + uint16(self.X))
-		break
+
 	case Mode_ZeroPageY:
 		address = uint16(uint16(self.Memory[self.PC+1]) + uint16(self.Y))
-		break
+
 	}
 	fmt.Printf("Got Address %02x", address)
 
@@ -230,7 +229,7 @@ func (self *Cpu) EmulateCycle() {
 
 }
 
-//ADC  Add Memory to Accumulator with Carry
+//Adc Add Memory to Accumulator with Carry
 //Must set Carry and Overflow Flag
 func Adc(self *Cpu) {
 	fmt.Println("Running Op Adc")
@@ -264,7 +263,7 @@ func Adc(self *Cpu) {
 
 }
 
-//AND, AND Memory with Accumulator
+//And, AND Memory with Accumulator
 // A AND M -> A
 func And(self *Cpu) {
 	fmt.Println("Running Op And")
@@ -274,7 +273,7 @@ func And(self *Cpu) {
 
 }
 
-//ASL  Shift Left One Bit (Memory or Accumulator)
+//Asl  Shift Left One Bit (Memory or Accumulator)
 // C <- [76543210] <- 0
 func Asl(self *Cpu) {
 	fmt.Println("Running Op Asl")

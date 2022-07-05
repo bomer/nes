@@ -2,7 +2,7 @@ package nes
 
 import "image/color"
 
-//Color palette contains 64 colors, referenced in Hex for rendering.
+//Palette contains 64 colors, referenced in Hex for rendering.
 //This is the default palette, I think you can have others?
 //No tests for this file, as go coverage requires functions for test coverage.
 var Palette = map[int]color.RGBA{
