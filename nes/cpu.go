@@ -150,38 +150,30 @@ func (self *Cpu) DecodeInstruction() {
 		// address=self.Memory
 		// abcd stored in x=34 x+1=12
 		address = self.ReadAddress(self.PC + 1)
-		break
+
 	case Mode_AbsoluteX:
 		address = self.ReadAddress(self.PC+1) + uint16(self.X)
-		break
 
 	case Mode_AbsoluteY:
 		address = self.ReadAddress(self.PC+1) + uint16(self.Y)
-		break
 
 	case Mode_Indirect: // TODO, need to do indirect_X and Y. Contains bug
 		address = self.ReadWrappedAddress(self.ReadAddress(self.PC + 1))
-		break
 
 	case Mode_IndirectX:
 		address = self.ReadWrappedAddress(self.ReadAddress(self.PC+1) + uint16(self.X))
-		break
 
 	case Mode_IndirectY:
 		address = self.ReadWrappedAddress(self.ReadAddress(self.PC+1) + uint16(self.Y))
-		break
 
 	case Mode_Immediate:
 		address = self.PC + 1
-		break
 
 	case Mode_Accumulator:
 		address = 0
-		break
 
 	case Mode_Implied:
 		address = 0
-		break
 
 	case Mode_Relative: //Crazy one
 		offset := uint16(self.Memory[self.PC+1])
