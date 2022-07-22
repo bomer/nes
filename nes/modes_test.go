@@ -1,12 +1,10 @@
 package nes_test
 
 import (
-	// "fmt"
-	Nes "github.com/bomer/nes/nes"
 	"testing"
-)
 
-var myNes Nes.Nes
+	Nes "github.com/bomer/nes/nes"
+)
 
 func TestModes(t *testing.T) {
 	// Mode_Immediate

@@ -25,11 +25,13 @@ type Cpu struct {
 	//non Global items, used to track instruction info
 	instruction byte       //Current value stored at memory[pc]
 	info        OpCodeInfo //Stores information about how to read the full op code
+	CycleCount  uint64
+	FrameCount  uint64
 
 	Quiet bool //
 }
 
-//Made possible by http://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit-in-c-c
+// SetFlag was Made possible by http://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit-in-c-c
 func (self *Cpu) SetFlag(flag int, tovalue bool) {
 	fmt.Printf("Setting flag at positon %d to %t", flag, tovalue)
 	fmt.Printf("Before - %b", self.S)
@@ -44,7 +46,7 @@ func (self *Cpu) SetFlag(flag int, tovalue bool) {
 
 }
 
-//Made possible by http://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit-in-c-c
+// GetFlag Made possible by http://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit-in-c-c
 func (self *Cpu) GetFlag(flag int) bool {
 	fmt.Printf("Getting flag at positon %d ", flag)
 	//check byte, will store the value of the pos like 128 or 0
@@ -93,7 +95,7 @@ func (self *Cpu) Push(value byte) {
 	self.SP--
 }
 
-//Push16 bit. Push a unsigned 16 bit integer into the stack.
+// Push16Bit Push a unsigned 16 bit integer into the stack.
 func (self *Cpu) Push16Bit(value uint16) {
 	low := value & 0xff
 	high := value >> 8 //push back 8 bits to the front
@@ -200,8 +202,9 @@ func (self *Cpu) DecodeInstruction() {
 	self.address = address
 	//Run Operation
 	self.info.RunOperation(self)
-	fmt.Println("Op Executed")
-	fmt.Println("Done with this op....")
+	self.CycleCount += uint64(self.info.No_Cycles)
+	fmt.Println("Op Executed - Cycle Count = %d", self.CycleCount)
+	fmt.Println("Done with this op.")
 	// Pause()
 
 }
@@ -263,7 +266,7 @@ func Adc(self *Cpu) {
 
 }
 
-//And, AND Memory with Accumulator
+//And is AND Memory with Accumulator
 // A AND M -> A
 func And(self *Cpu) {
 	fmt.Println("Running Op And")

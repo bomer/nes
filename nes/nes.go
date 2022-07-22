@@ -20,6 +20,10 @@ func Pause() {
 	fmt.Printf("%d", a)
 }
 
+// CyclesPerSecond = 1.79mhz
+const CyclesPerSecond = 1789773
+const CuclesPerFrame = 29780.5
+
 //Init Starts NES system. This controls the main loop and emulation of CPU Cycles
 func (nes *Nes) Init() {
 
@@ -29,9 +33,13 @@ func (nes *Nes) Init() {
 	//Run emulator on another go-routine
 	//Else emulator runs to slow on main thread.
 	// go func() {
-	emuticker := time.NewTicker(time.Second / 30) //TODO - Replace with nes CPU FREQ
+
+	emuticker := time.NewTicker(time.Second / CyclesPerSecond) //TODO - Replace with nes CPU FREQ
 	for {
 		nes.Cpu.EmulateCycle()
+		nes.Ppu.EmulateCycle()
+		nes.Ppu.EmulateCycle()
+		nes.Ppu.EmulateCycle()
 		<-emuticker.C
 	}
 	// }()
