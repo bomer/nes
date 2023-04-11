@@ -2,8 +2,9 @@ package nes_test
 
 import (
 	"fmt"
-	Nes "github.com/bomer/nes/nes"
 	"testing"
+
+	Nes "github.com/bomer/nes/nes"
 )
 
 //TestNES - All unit tests are written in mariographical order.
@@ -13,7 +14,7 @@ var nes Nes.Nes
 
 func Setup() {
 	nes.Cpu.Quiet = true
-	nes.Rom.LoadGame("../mario.nes", &nes.Cpu)
+	nes.Rom.LoadGame("../mario.nes", &nes)
 	nes.Cpu.Init()
 	nes.Cpu.S = 0
 	nes.Cpu.Quiet = false
@@ -1090,7 +1091,7 @@ func TestNOP(t *testing.T) {
 }
 
 //0x00 BRK and RTI
-// Dec 2021, Moving back PC check, after moving 
+// Dec 2021, Moving back PC check, after moving
 func TestBRK(t *testing.T) {
 	Setup()
 	nes.Cpu.PC = 0xaa

@@ -18,7 +18,7 @@ type RomHeader struct {
 
 // Where the cartridge is read in
 // Read file in curent dir into Memory of NES CPU
-func (self *Rom) LoadGame(filename string, cpu *Cpu) {
+func (self *Rom) LoadGame(filename string, nes *Nes) {
 	var header RomHeader
 	rom, _ := ioutil.ReadFile(filename)
 	rom_length := len(rom)
@@ -52,9 +52,24 @@ func (self *Rom) LoadGame(filename string, cpu *Cpu) {
 	fmt.Printf("Writing %d\n", PGRBytes)
 	i := 0
 	for i = 0; i < PGRBytes; i++ {
-		cpu.WriteMemory(uint16(i+0x8000), rom[i+16])
+		nes.Cpu.WriteMemory(uint16(i+0x8000), rom[i+16])
 	}
 	fmt.Printf("wrote %d bytes \n", i)
+	//Read bytes i to i + 8192
+
+	ppuRam := rom[i : i+8192]
+	println("Read CHR Bank of")
+	fmt.Printf("ppu BANK %d\n", ppuRam)
+
+	copy(nes.Ppu.Memory[:], ppuRam)
+
+	nes.Ppu.GetInfoForPatternTable()
+	// for j := i; j < finish; j++ {
+
+	// }
+
+	// Now read 8k bytes and save to PPU ram.
+
 	// fmt.Printf("%%", cpu.Memory)
 	// if (4096 - 512) > 2^14 {
 	// 	for i := 0; i < rom_length; i++ {

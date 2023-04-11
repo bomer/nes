@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/bomer/nes/nes"
 )
 
@@ -11,8 +12,8 @@ func main() {
 
 	fmt.Printf("Initing...")
 	myNes.Cpu.Quiet = true
-	myNes.Rom.LoadGame("mario.nes", &myNes.Cpu)
-	myNes.Cpu.Quiet = false
+	myNes.Rom.LoadGame("mario.nes", &myNes)
+	// myNes.Cpu.Quiet = false
 	myNes.Init()
 	// myNes.Cpu
 

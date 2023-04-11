@@ -203,7 +203,7 @@ func (self *Cpu) DecodeInstruction() {
 	//Run Operation
 	self.info.RunOperation(self)
 	self.CycleCount += uint64(self.info.No_Cycles)
-	fmt.Println("Op Executed - Cycle Count = %d", self.CycleCount)
+	fmt.Println("Op Executed - Cycle Count = %@", self.CycleCount)
 	fmt.Println("Done with this op.")
 	// Pause()
 
@@ -352,7 +352,20 @@ func Bpl(self *Cpu) {
 	}
 }
 
-// BRK - Force Interupt
+// // BRK - Force Interupt
+// Chat GPT's description
+// The BRK (Break) instruction on the NES (Nintendo Entertainment System) CPU is used to signal an interrupt and halt the execution of the current program.
+// The BRK instruction consists of a single byte opcode (0x00) and is typically used for software debugging purposes.
+// When the CPU encounters the BRK instruction, it performs the following steps:
+// Push the address of the next instruction on the stack.
+// Set the interrupt flag (I flag) in the status register to prevent any further interrupts.
+// Push the status register on the stack.
+// Load the interrupt vector at address 0xFFFE and jump to that address.
+// The interrupt vector at 0xFFFE is a 16-bit address that points to the location of the interrupt service routine (ISR) for the BRK instruction.
+// The ISR typically contains code that handles the software debugging operations and then returns control to the main program.
+// Once the ISR is finished executing, it will load the program counter with the address that was pushed onto the stack during step 1, then restore the status register from the stack during step 3.
+// The CPU will then continue executing instructions from the program counter that was loaded, as if the BRK instruction never happened.
+// In summary, the NES BRK instruction is used to signal an interrupt and halt the execution of the current program, allowing the CPU to perform a software debugging operation before returning to the main program.
 // push PC+2, push SR
 func Brk(self *Cpu) {
 	fmt.Println("Running Op Brk, cpu info  - ")
