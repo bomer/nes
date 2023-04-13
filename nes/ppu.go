@@ -50,26 +50,73 @@ type Ppu struct {
 // 	copy(p.Memory[:], chrbanks)
 // }
 
+// BooleanArrayFromByte Returns an array of booleans from a byte to do easier creation of sprites
+func BooleanArrayFromByte(b byte) [8]bool {
+	arrayOfBools := [8]bool{
+		b&128 != 0,
+		b&64 != 0,
+		b&32 != 0,
+		b&16 != 0,
+		b&8 != 0,
+		b&4 != 0,
+		b&2 != 0,
+		b&1 != 0,
+	}
+	return arrayOfBools
+}
+
+// 	fmt.Printf("Bit 2 %d \n", v&2 != 0)
+// 	fmt.Printf("Bit 3 %d \n", v&4 != 0)
+// 	fmt.Printf("Bit 4 %d \n", v&8 != 0)
+// 	fmt.Printf("Bit 5 %d \n", v&16 != 0)
+// 	fmt.Printf("Bit 6 %d \n", v&32 != 0)
+// 	fmt.Printf("Bit 7 %d \n", v&64 != 0)
+// 	fmt.Printf("Bit 8 %d \n", v&128 != 0)
+// }
+
+//
+//Testing colors
+var Reset = "\033[0m"
+var Red = "\033[31m"
+var Green = "\033[32m"
+var Yellow = "\033[33m"
+var Blue = "\033[34m"
+var Purple = "\033[35m"
+var Cyan = "\033[36m"
+var Gray = "\033[37m"
+var White = "\033[97m"
+
 func (p *Ppu) GetInfoForPatternTable() {
 	println("Checking at address 0x00, x:0,y:0")
 	println(p.Memory[0x00:0x02])
 
-	fmt.Printf("ppu BANK 0x%b\n", p.Memory[0:16])
+	fmt.Printf("ppu BANK 0x%x \n", p.Memory[0:16])
 	tile := p.Memory[0:16]
 	for i, v := range tile {
-		fmt.Printf("Tile: i: %d %b\n", i, v)
+		fmt.Printf("Tile: i: %d %08b : int val - %d \n", i, v, v)
 		//  128 64 32 16  8 4 2 1
-		fmt.Printf("Bit 1 %d \n", v&1 == 1)
-		fmt.Printf("Bit 2 %d \n", v&2)
-		fmt.Printf("Bit 3 %d \n", v&4)
-		fmt.Printf("Bit 4 %d \n", v&8)
-		fmt.Printf("Bit 5 %d \n", v&16)
-		fmt.Printf("Bit 6 %d \n", v&32)
-		fmt.Printf("Bit 7 %d \n", v&128)
-		fmt.Printf("Bit 8 %d \n", v&255)
-		// fmt.Printf("Bit 1 %d \n", v&1)
+		if i < 8 {
+			rowOfPixels := BooleanArrayFromByte(v)
+			compositeRowOfPixels := BooleanArrayFromByte(tile[i+8])
+
+			// fmt.Printf("Pixels: i: %a:", rowOfPixels)
+			//Now build a tile with values 0,1,2,3
+			for pixelIndex, pixel := range rowOfPixels {
+				compositePixel := compositeRowOfPixels[pixelIndex]
+
+				//Color 3
+				if pixel && compositePixel {
+					print(Red + "■" + Reset)
+				} else if !pixel && compositePixel { // color 2
+					print(Blue + "■" + Reset)
+				} else if pixel && !compositePixel { // color 1
+					print(Cyan + "■" + Reset)
+				} else {
+					print(" ")
+				}
+			}
+		}
 	}
-	//Now build a tile with values 0,1,2,3
 
 	// fmt.Printf("ppu BANK 0x%d\n", p.Memory[0x01])
 }

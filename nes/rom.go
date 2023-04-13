@@ -57,9 +57,9 @@ func (self *Rom) LoadGame(filename string, nes *Nes) {
 	fmt.Printf("wrote %d bytes \n", i)
 	//Read bytes i to i + 8192
 
-	ppuRam := rom[i : i+8192]
+	ppuRam := rom[i+16 : i+8192+16]
 	println("Read CHR Bank of")
-	fmt.Printf("ppu BANK %d\n", ppuRam)
+	fmt.Printf("ppu BANK %x\n", ppuRam)
 
 	copy(nes.Ppu.Memory[:], ppuRam)
 
