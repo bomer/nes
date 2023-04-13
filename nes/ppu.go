@@ -91,9 +91,23 @@ func (p *Ppu) GetInfoForPatternTable() {
 	println(p.Memory[0x00:0x02])
 
 	fmt.Printf("ppu BANK 0x%x \n", p.Memory[0:16])
-	tile := p.Memory[0:16]
+	// tile := p.Memory[0:16]
+	// printTile(tile)
+
+	//Loop through first character bank for testing purposes.
+	for i := 0; i < 0xff*16; i += 16 {
+
+		// fmt.Printf("Tile: i: %d \n\n", i)
+		tile := p.Memory[i : i+16]
+		printTile(tile)
+	}
+	// fmt.Printf("ppu BANK 0x%d\n", p.Memory[0x01])
+}
+
+func printTile(tile []byte) {
+
 	for i, v := range tile {
-		fmt.Printf("Tile: i: %d %08b : int val - %d \n", i, v, v)
+		// fmt.Printf("Tile: i: %d %08b : int val - %d \n", i, v, v)
 		//  128 64 32 16  8 4 2 1
 		if i < 8 {
 			rowOfPixels := BooleanArrayFromByte(v)
@@ -115,10 +129,10 @@ func (p *Ppu) GetInfoForPatternTable() {
 					print(" ")
 				}
 			}
+			println()
 		}
-	}
 
-	// fmt.Printf("ppu BANK 0x%d\n", p.Memory[0x01])
+	}
 }
 
 //GetColorFromPalette is used to grab an color.RGBA value from it's hex index of 64 colors.
