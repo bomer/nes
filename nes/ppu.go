@@ -74,7 +74,6 @@ func BooleanArrayFromByte(b byte) [8]bool {
 // 	fmt.Printf("Bit 8 %d \n", v&128 != 0)
 // }
 
-//
 //Testing colors
 var Reset = "\033[0m"
 var Red = "\033[31m"
