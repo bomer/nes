@@ -218,7 +218,7 @@ func (self *Cpu) Init() {
 	// Test mode lookup table
 	// fmt.Printf("Mode_Absolute %d \n", Mode_Absolute)
 	// fmt.Printf("Mode_Absolute %+v \n", OpTable[0x00])
-	// Pause()
+	Pause()
 
 	self.PC = 0xFFFC //Loads back a step then reads ahead like a normal op code
 	self.PC = self.ReadAddress(self.PC)

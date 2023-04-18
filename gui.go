@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"image"
 	"log"
 
 	"github.com/bomer/nes/nes"
@@ -135,6 +134,7 @@ func onPaint(glctx gl.Context, sz size.Event) {
 	// green := image.NewUniform(color.RGBA{0x00, 0x1f, 0x00, 0xff})
 	//For each 256 Sprites > Sprite = [8][8]uint8
 	count := 0
+	countx := 0
 	for _, sprite := range myNes.Ppu.TileMap {
 		// println("Reading index of $d ", index)
 		// fmt.Printf("Reading index of $@ ", sprite)
@@ -143,14 +143,21 @@ func onPaint(glctx gl.Context, sz size.Event) {
 			//For each pixels in each row...
 			for pixelindex, pixelvalue := range arrayOfRows {
 				// fmt.Printf("Reading value of of $@ ", pixelvalue)
-				if pixelvalue == 3 {
-					img.RGBA.Set(pixelindex, rowindex+8, image.Black)
+				xoffset := 0 //((count % 2) == 0) * 8
+				if (count % 2) == 1 {
+					xoffset = 8
+				}
+				if pixelvalue != 0 {
+					img.RGBA.Set(pixelindex+xoffset, rowindex+countx, myNes.Ppu.GetColorFromPalette(int(pixelvalue+1)))
 				}
 				// img.RGBA.Set(pixelindex, rowindex, green)
 			}
 		}
-		count += 8
-		break
+		count += 1
+		if (count%2) == 0 && count > 0 {
+			countx += 8
+		}
+
 	}
 
 	//Draw over whole screen
@@ -171,7 +178,7 @@ func onPaint(glctx gl.Context, sz size.Event) {
 
 	//cleanup every  frame
 	img.Release()
-	img = *images.NewImage(64, 32)
+	img = *images.NewImage(256/2, 224/2)
 
 }
 
