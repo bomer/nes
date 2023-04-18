@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
+	"image"
 	"log"
 
 	"github.com/bomer/nes/nes"
@@ -122,13 +123,34 @@ func onPaint(glctx gl.Context, sz size.Event) {
 	glctx.BindBuffer(gl.ARRAY_BUFFER, buf)
 
 	//Draw Pixels onto screen
-	for i := 0; i < 64; i++ {
-		for j := 0; j < 32; j++ {
-			// if myChip8.Gfx[(j*64)+i] == 0 {
-			// img.RGBA.Set(i, j, image.Black)
-			// }
+	// for i := 0; i < 64; i++ {
+	// for j := 0; j < 32; j++ {
+	// if myChip8.Gfx[(j*64)+i] == 0 {
+	// img.RGBA.Set(i, j, image.Black)
+	// }
 
+	// }
+	// }
+
+	// green := image.NewUniform(color.RGBA{0x00, 0x1f, 0x00, 0xff})
+	//For each 256 Sprites > Sprite = [8][8]uint8
+	count := 0
+	for _, sprite := range myNes.Ppu.TileMap {
+		// println("Reading index of $d ", index)
+		// fmt.Printf("Reading index of $@ ", sprite)
+		//For each row of pixels
+		for rowindex, arrayOfRows := range sprite {
+			//For each pixels in each row...
+			for pixelindex, pixelvalue := range arrayOfRows {
+				// fmt.Printf("Reading value of of $@ ", pixelvalue)
+				if pixelvalue == 3 {
+					img.RGBA.Set(pixelindex, rowindex+8, image.Black)
+				}
+				// img.RGBA.Set(pixelindex, rowindex, green)
+			}
 		}
+		count += 8
+		break
 	}
 
 	//Draw over whole screen

@@ -42,7 +42,10 @@ type Ppu struct {
 	ScanLine int // 0-261, 0-239=are visible frames, 240=post, 241-260=vblank, 261=pre
 	Frame    uint64
 	Memory   [0x3FFF + 1]byte // 16kb address space.
+
+	TileMap [256]Sprite // Array of 256 sprites, for displaying in test render. Wont be used for real emulation
 }
+type Sprite [8][8]uint8
 
 //Set Memory
 // func (p *Ppu) SetMemory(chrbanks []byte) {
@@ -85,6 +88,8 @@ var Cyan = "\033[36m"
 var Gray = "\033[37m"
 var White = "\033[97m"
 
+//
+
 func (p *Ppu) GetInfoForPatternTable() {
 	println("Checking at address 0x00, x:0,y:0")
 	println(p.Memory[0x00:0x02])
@@ -94,17 +99,17 @@ func (p *Ppu) GetInfoForPatternTable() {
 	// printTile(tile)
 
 	//Loop through first character bank for testing purposes.
-	for i := 0; i < 0xff*16; i += 16 {
+	for i := 0; i <= 0xff*16; i += 16 {
 
-		// fmt.Printf("Tile: i: %d \n\n", i)
+		fmt.Printf("Tile: i: %d \n\n", i)
 		tile := p.Memory[i : i+16]
-		printTile(tile)
+		p.TileMap[i/16] = printTile(tile)
 	}
 	// fmt.Printf("ppu BANK 0x%d\n", p.Memory[0x01])
 }
 
-func printTile(tile []byte) {
-
+func printTile(tile []byte) Sprite {
+	var sprite Sprite
 	for i, v := range tile {
 		// fmt.Printf("Tile: i: %d %08b : int val - %d \n", i, v, v)
 		//  128 64 32 16  8 4 2 1
@@ -120,18 +125,22 @@ func printTile(tile []byte) {
 				//Color 3
 				if pixel && compositePixel {
 					print(Red + "■" + Reset)
+					sprite[i][pixelIndex] = 3
 				} else if !pixel && compositePixel { // color 2
 					print(Blue + "■" + Reset)
+					sprite[i][pixelIndex] = 2
 				} else if pixel && !compositePixel { // color 1
 					print(Cyan + "■" + Reset)
+					sprite[i][pixelIndex] = 1
 				} else {
 					print(" ")
+					sprite[i][pixelIndex] = 0
 				}
 			}
 			println()
 		}
-
 	}
+	return sprite
 }
 
 //GetColorFromPalette is used to grab an color.RGBA value from it's hex index of 64 colors.
