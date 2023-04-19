@@ -43,7 +43,7 @@ type Ppu struct {
 	Frame    uint64
 	Memory   [0x3FFF + 1]byte // 16kb address space.
 
-	TileMap [256]Sprite // Array of 256 sprites, for displaying in test render. Wont be used for real emulation
+	TileMap [256 * 2]Sprite // Array of 256 sprites, for displaying in test render. Wont be used for real emulation
 }
 type Sprite [8][8]uint8
 
@@ -99,7 +99,7 @@ func (p *Ppu) GetInfoForPatternTable() {
 	// printTile(tile)
 
 	//Loop through first character bank for testing purposes.
-	for i := 0; i <= 0xff*16; i += 16 {
+	for i := 0; i <= 0xff*16*2; i += 16 {
 
 		fmt.Printf("Tile: i: %d \n\n", i)
 		tile := p.Memory[i : i+16]

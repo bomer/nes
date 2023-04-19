@@ -134,28 +134,33 @@ func onPaint(glctx gl.Context, sz size.Event) {
 	// green := image.NewUniform(color.RGBA{0x00, 0x1f, 0x00, 0xff})
 	//For each 256 Sprites > Sprite = [8][8]uint8
 	count := 0
-	countx := 0
+	// countx := 0
+	county := 0
+	// xoffset := 0
+	xoffset := 0 //((count % 2) == 0) * 8
 	for _, sprite := range myNes.Ppu.TileMap {
 		// println("Reading index of $d ", index)
 		// fmt.Printf("Reading index of $@ ", sprite)
 		//For each row of pixels
+
 		for rowindex, arrayOfRows := range sprite {
 			//For each pixels in each row...
 			for pixelindex, pixelvalue := range arrayOfRows {
 				// fmt.Printf("Reading value of of $@ ", pixelvalue)
-				xoffset := 0 //((count % 2) == 0) * 8
-				if (count % 2) == 1 {
-					xoffset = 8
-				}
+
 				if pixelvalue != 0 {
-					img.RGBA.Set(pixelindex+xoffset, rowindex+countx, myNes.Ppu.GetColorFromPalette(int(pixelvalue+1)))
+					img.RGBA.Set(pixelindex+xoffset, rowindex+county, myNes.Ppu.GetColorFromPalette(int(pixelvalue+1)))
 				}
-				// img.RGBA.Set(pixelindex, rowindex, green)
+
 			}
 		}
 		count += 1
-		if (count%2) == 0 && count > 0 {
-			countx += 8
+		// if (count % 2) == 0 {
+		xoffset += 8
+		// }
+		if (count%16) == 0 && count > 0 {
+			county += 8
+			xoffset = 0
 		}
 
 	}
@@ -178,7 +183,7 @@ func onPaint(glctx gl.Context, sz size.Event) {
 
 	//cleanup every  frame
 	img.Release()
-	img = *images.NewImage(256/2, 224/2)
+	img = *images.NewImage(256, 224)
 
 }
 
