@@ -18,14 +18,14 @@ Done so far this year:
 
 # TODO
 
-- [] Start doing PPU Tick Processing, building a buffer for display and processing background and sprites
+- [ ] Start doing PPU Tick Processing, building a buffer for display and processing background and sprites
 - [ ] Load Background onto buffer and render
 - [ ] Load Sprites
 - [ ] Memory mapping to push updates to the PPU Memory, specifically OAM + attribute tables else screen will never update
 - [ ] Controls mapping
-- [ ]
+- [ ] Making mario fully playable
 
 # Far Future:
 
 - Proper Memory Mapping (Basically hard coded MM0/1)
--
+- Sound
