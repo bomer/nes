@@ -101,7 +101,7 @@ func (p *Ppu) GetInfoForPatternTable() {
 	//Loop through first character bank for testing purposes.
 	for i := 0; i <= 0xff*16*2; i += 16 {
 
-		fmt.Printf("Tile: i: %d \n\n", i)
+		// fmt.Printf("Tile: i: %d \n\n", i)
 		tile := p.Memory[i : i+16]
 		p.TileMap[i/16] = printTile(tile)
 	}
@@ -124,20 +124,20 @@ func printTile(tile []byte) Sprite {
 
 				//Color 3
 				if pixel && compositePixel {
-					print(Red + "■" + Reset)
+					// print(Red + "■" + Reset)
 					sprite[i][pixelIndex] = 3
 				} else if !pixel && compositePixel { // color 2
-					print(Blue + "■" + Reset)
+					// print(Blue + "■" + Reset)
 					sprite[i][pixelIndex] = 2
 				} else if pixel && !compositePixel { // color 1
-					print(Cyan + "■" + Reset)
+					// print(Cyan + "■" + Reset)
 					sprite[i][pixelIndex] = 1
 				} else {
-					print(" ")
+					// print(" ")
 					sprite[i][pixelIndex] = 0
 				}
 			}
-			println()
+			// println()
 		}
 	}
 	return sprite
