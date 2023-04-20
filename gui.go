@@ -18,7 +18,7 @@ import (
 	"golang.org/x/mobile/gl"
 )
 
-var myNes nes.Nes
+var guiNes nes.Nes
 
 var (
 	images   *glutil.Images
@@ -38,14 +38,14 @@ var (
 func main() {
 
 	fmt.Printf("Initing...")
-	myNes.Cpu.Quiet = true
-	myNes.Rom.LoadGame("mario.nes", &myNes)
-	// myNes.Cpu.Quiet = false
-	go myNes.Init()
-	// myNes.Cpu
+	guiNes.Cpu.Quiet = true
+	guiNes.Rom.LoadGame("mario.nes", &guiNes)
+	// guiNes.Cpu.Quiet = false
+	go guiNes.Init()
+	// guiNes.Cpu
 
 	// for {
-	// 	myNes.Cpu.EmulateCycle()
+	// 	guiNes.Cpu.EmulateCycle()
 	// }
 
 	app.Main(func(a app.App) {
@@ -94,8 +94,8 @@ func onStart(glctx gl.Context) {
 		return
 	}
 	buf = glctx.CreateBuffer()
-	glctx.BindBuffer(gl.ARRAY_BUFFER, buf)
-	glctx.BufferData(gl.ARRAY_BUFFER, triangleData, gl.STATIC_DRAW)
+	// glctx.BindBuffer(gl.ARRAY_BUFFER, buf)
+	// glctx.BufferData(gl.ARRAY_BUFFER, triangleData, gl.STATIC_DRAW)
 	position = glctx.GetAttribLocation(program, "position")
 	color = glctx.GetUniformLocation(program, "color")
 	offset = glctx.GetUniformLocation(program, "offset")
@@ -138,7 +138,7 @@ func onPaint(glctx gl.Context, sz size.Event) {
 	county := 0
 	// xoffset := 0
 	xoffset := 0 //((count % 2) == 0) * 8
-	for _, sprite := range myNes.Ppu.TileMap {
+	for _, sprite := range guiNes.Ppu.TileMap {
 		// println("Reading index of $d ", index)
 		// fmt.Printf("Reading index of $@ ", sprite)
 		//For each row of pixels
@@ -149,7 +149,7 @@ func onPaint(glctx gl.Context, sz size.Event) {
 				// fmt.Printf("Reading value of of $@ ", pixelvalue)
 
 				if pixelvalue != 0 {
-					img.RGBA.Set(pixelindex+xoffset, rowindex+county, myNes.Ppu.GetColorFromPalette(int(pixelvalue+1)))
+					img.RGBA.Set(pixelindex+xoffset, rowindex+county, guiNes.Ppu.GetColorFromPalette(int(pixelvalue+1)))
 				}
 
 			}
