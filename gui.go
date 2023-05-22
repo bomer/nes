@@ -139,19 +139,14 @@ func onPaint(glctx gl.Context, sz size.Event) {
 	// xoffset := 0
 	xoffset := 0 //((count % 2) == 0) * 8
 	for _, sprite := range guiNes.Ppu.TileMap {
-		// println("Reading index of $d ", index)
-		// fmt.Printf("Reading index of $@ ", sprite)
 		//For each row of pixels
-
 		for rowindex, arrayOfRows := range sprite {
 			//For each pixels in each row...
 			for pixelindex, pixelvalue := range arrayOfRows {
 				// fmt.Printf("Reading value of of $@ ", pixelvalue)
-
 				if pixelvalue != 0 {
 					img.RGBA.Set(pixelindex+xoffset, rowindex+county, guiNes.Ppu.GetColorFromPalette(int(pixelvalue+1)))
 				}
-
 			}
 		}
 		count += 1

@@ -43,8 +43,16 @@ type Ppu struct {
 	Frame    uint64
 	Memory   [0x3FFF + 1]byte // 16kb address space.
 
+	//FrameBuffer to render on GUI Display.
+	FrameBuffer [256][240]uint8
+
 	TileMap [256 * 2]Sprite // Array of 256 sprites, for displaying in test render. Wont be used for real emulation
 }
+
+const MaxRenderableScanlines = 239
+const MaxScanLines = 262
+const MaxPixelsPerScanline = 256
+
 type Sprite [8][8]uint8
 
 //Set Memory
@@ -152,6 +160,41 @@ func (p *Ppu) GetColorFromPalette(c int) color.RGBA {
 // EmulateCycle is called 3 times for ever 1 CPU Cycle.
 // There are 262 Scanlines per frame.
 // Each scanline is 341 PPU Cycles
+
+// Conceptually, the PPU does this 33 times for each scanline:
+
+//EmulateCycle runs through One PPU. tick. Every Scanline it does 33 fetches of ram.
+// I'm
+// Fetch a nametable entry from $2000-$2FBF.
+// Fetch the corresponding attribute table entry from $23C0-$2FFF and increment the current VRAM address within the same row.
+// Fetch the low-order byte of an 8x1 pixel sliver of pattern table from $0000-$0FF7 or $1000-$1FF7.
+// Fetch the high-order byte of this sliver from an address 8 bytes higher.
+// Turn the attribute data and the pattern table data into palette indices, and combine them with data from sprite data using priority.
+// It also does a fetch of a 34th (nametable, attribute, pattern) tuple that is never used, but some mappers rely on this fetch for timing purposes.
 func (p *Ppu) EmulateCycle() {
 	//Do one pixel
+
+	//Get the nametable entry from memory $2000-$2fbf
+	//Name table entries are 32x30 rows. square for the whole screen space.
+	bgSpriteNametablePosition := p.Cycle / 8
+	bgSpriteNametableEntry := p.Memory[0x2FAA]
+	fmt.Printf("Getting Sprite at %d, with value %d \n ", bgSpriteNametablePosition, bgSpriteNametableEntry)
+
+	//Get the background from the pattern Table.
+
+	//Get the attribute data to set the right colors.
+
+	//Increment the count of
+	p.Cycle++
+	if p.Cycle > MaxPixelsPerScanline {
+		p.ScanLine++
+		p.Cycle = 0
+	}
+	if p.ScanLine > MaxScanLines {
+		p.Frame++
+		fmt.Printf("I have a frame ready to render frame %d !", p.Frame)
+		p.Cycle = 0
+		p.ScanLine = 0
+
+	}
 }

@@ -63,6 +63,7 @@ func (self *Rom) LoadGame(filename string, nes *Nes) {
 
 	copy(nes.Ppu.Memory[:], ppuRam)
 
+	// This loads a array of sprites on the PPU for debug outputting.
 	nes.Ppu.GetInfoForPatternTable()
 	// for j := i; j < finish; j++ {
 

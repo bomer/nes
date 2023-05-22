@@ -22,7 +22,7 @@ func Pause() {
 
 // CyclesPerSecond = 1.79mhz
 const CyclesPerSecond = 1789773
-const CuclesPerFrame = 29780.5
+const CyclesPerFrame = 29780.5
 
 //Init Starts NES system. This controls the main loop and emulation of CPU Cycles
 func (nes *Nes) Init() {
