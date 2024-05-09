@@ -13,7 +13,7 @@ func main() {
 	fmt.Printf("Initing...")
 	myNes.Cpu.Quiet = true
 	myNes.Rom.LoadGame("mario.nes", &myNes)
-	// myNes.Cpu.Quiet = false
+	myNes.Cpu.Quiet = false
 	myNes.Init()
 	// myNes.Cpu
 
