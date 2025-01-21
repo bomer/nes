@@ -1,0 +1,1 @@
+go test ./nes -v

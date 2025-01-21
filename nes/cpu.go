@@ -2,6 +2,7 @@ package nes
 
 import (
 	"fmt"
+	"log"
 )
 
 type Cpu struct {
@@ -20,21 +21,26 @@ type Cpu struct {
 	//Address to be used for read ops
 	address uint16
 
+	// System References
 	RomReader Rom
+	System    *Nes
 
 	//non Global items, used to track instruction info
-	instruction byte       //Current value stored at memory[pc]
-	info        OpCodeInfo //Stores information about how to read the full op code
-	CycleCount  uint64
-	FrameCount  uint64
+	instruction      byte       //Current value stored at memory[pc]
+	info             OpCodeInfo //Stores information about how to read the full op code
+	CycleCount       uint64
+	FrameCount       uint64
+	InstructionCount uint64 // Not useful number, but for my debugging
 
-	Quiet bool //
+	Quiet      bool // Debug Logs
+	Debug      bool
+	DebugLines uint64
 }
 
 // SetFlag was Made possible by http://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit-in-c-c
 func (self *Cpu) SetFlag(flag int, tovalue bool) {
-	fmt.Printf("Setting flag at positon %d to %t", flag, tovalue)
-	fmt.Printf("Before - %b", self.S)
+	fmt.Printf("Setting flag at positon %d to %t - ", flag, tovalue)
+	fmt.Printf("Before - %b ", self.S)
 	//check
 	// n |= (1 << self.S)
 	if tovalue {
@@ -69,14 +75,49 @@ func (self *Cpu) WriteMemory(address uint16, value byte) {
 	self.Memory[address] = value
 }
 
+// Read Memory from an address. This needs to take into account the full memory map.
+// Todo - Add full memory mapp as per below.
+
+// Address range	Size	Device
+// $0000–$07FF	$0800	2 KB internal RAM
+// $0800–$0FFF	$0800	Mirrors of $0000–$07FF
+// $1000–$17FF	$0800
+// $1800–$1FFF	$0800
+// $2000–$2007	$0008	NES PPU registers
+// $2008–$3FFF	$1FF8	Mirrors of $2000–$2007 (repeats every 8 bytes)
+// $4000–$4017	$0018	NES APU and I/O registers
+// $4018–$401F	$0008	APU and I/O functionality that is normally disabled. See CPU Test Mode.
+// $4020–$FFFF
+// • $6000–$7FFF
+// • $8000–$FFFF	$BFE0
+// $2000
+// $8000	Unmapped. Available for cartridge use.
+// Usually cartridge RAM, when present.
+// Usually cartridge ROM and mapper registers.
+// PPU Bytes
+// PPUCTRL	$2000	VPHB SINN	W	NMI enable (V), PPU master/slave (P), sprite height (H), background tile select (B), sprite tile select (S), increment mode (I), nametable select / X and Y scroll bit 8 (NN)
+// PPUMASK	$2001	BGRs bMmG	W	color emphasis (BGR), sprite enable (s), background enable (b), sprite left column enable (M), background left column enable (m), greyscale (G)
+// PPUSTATUS	$2002	VSO- ----	R	vblank (V), sprite 0 hit (S), sprite overflow (O); read resets write pair for $2005/$2006
+// OAMADDR	$2003	AAAA AAAA	W	OAM read/write address
+// OAMDATA	$2004	DDDD DDDD	RW	OAM data read/write
+// PPUSCROLL	$2005	XXXX XXXX YYYY YYYY	Wx2	X and Y scroll bits 7-0 (two writes: X scroll, then Y scroll)
+// PPUADDR	$2006	..AA AAAA AAAA AAAA	Wx2	VRAM address (two writes: most significant byte, then least significant byte)
+// PPUDATA	$2007	DDDD DDDD	RW	VRAM data read/write
+// OAMDMA	$4014	AAAA AAAA	W	OAM DMA high address
 func (self *Cpu) ReadAddressByte(start uint16) uint8 {
+
+	if start == 0x2002 {
+		fmt.Printf("Got PPU Memory for PPUCTRL %d", self.System.Ppu.PPUCTRL)
+		return self.System.Ppu.PPUCTRL
+	}
+
 	return uint8(self.Memory[start])
 }
 
 func (self *Cpu) ReadAddress(start uint16) uint16 {
 	b1 := uint16(self.Memory[start])
 	b2 := uint16(self.Memory[start+1])
-	fmt.Printf("Op Code %02x , B1=%02x b2=%02x", self.instruction, b1, b2)
+	fmt.Printf("Op Code %02x , B1=%02x B2=%02x\n", self.instruction, b1, b2)
 	address := uint16(b2)<<8 | b1
 	return address
 }
@@ -119,7 +160,7 @@ func (self *Cpu) Pull16Bit() uint16 {
 	return ret
 }
 
-//Check for negative & zero, common on sets +  calculations
+// Check for negative & zero, common on sets +  calculations
 func (self *Cpu) CheckNZ(value byte) {
 	if value == 0 {
 		self.SetFlag(Status_Z, true)
@@ -137,7 +178,7 @@ func (self *Cpu) CheckNZ(value byte) {
 }
 
 func (self *Cpu) DecodeInstruction() {
-	fmt.Printf("About to run instruction at %04x\n", self.PC)
+	fmt.Printf("\n=====\nAbout to run instruction at %04x\n", self.PC)
 	self.instruction = self.Memory[self.PC]
 	fmt.Printf("Instruction %02x \n", self.instruction)
 	self.info = OpTable[int(self.instruction)]
@@ -200,12 +241,21 @@ func (self *Cpu) DecodeInstruction() {
 	//Moving Increnement PC before??
 	self.PC += uint16(self.info.No_Bytes)
 	self.address = address
+
+	if self.address == 0x2007 || self.address == 0x2006 {
+		log.Fatalln("Interacting with VRM which I haven't coded shit")
+	}
 	//Run Operation
 	self.info.RunOperation(self)
 	self.CycleCount += uint64(self.info.No_Cycles)
-	fmt.Println("Op Executed - Cycle Count = %@", self.CycleCount)
+	self.InstructionCount++
+	fmt.Printf("Op Executed - Cycle Count = %d. Instruction Count: %d \n", self.CycleCount, self.InstructionCount)
 	fmt.Println("Done with this op.")
-	// Pause()
+	fmt.Println("=====")
+
+	if self.Debug && self.InstructionCount%self.DebugLines == 0 {
+		Pause()
+	}
 
 }
 
@@ -232,8 +282,8 @@ func (self *Cpu) EmulateCycle() {
 
 }
 
-//Adc Add Memory to Accumulator with Carry
-//Must set Carry and Overflow Flag
+// Adc Add Memory to Accumulator with Carry
+// Must set Carry and Overflow Flag
 func Adc(self *Cpu) {
 	fmt.Println("Running Op Adc")
 	// A + M + C -> A, C
@@ -266,7 +316,7 @@ func Adc(self *Cpu) {
 
 }
 
-//And is AND Memory with Accumulator
+// And is AND Memory with Accumulator
 // A AND M -> A
 func And(self *Cpu) {
 	fmt.Println("Running Op And")
@@ -276,7 +326,7 @@ func And(self *Cpu) {
 
 }
 
-//Asl  Shift Left One Bit (Memory or Accumulator)
+// Asl  Shift Left One Bit (Memory or Accumulator)
 // C <- [76543210] <- 0
 func Asl(self *Cpu) {
 	fmt.Println("Running Op Asl")
@@ -315,7 +365,7 @@ func Bcs(self *Cpu) {
 	}
 }
 
-//BEQ Branch on Result Zero
+// BEQ Branch on Result Zero
 func Beq(self *Cpu) {
 	fmt.Println("Running Op Beq")
 	if self.GetFlag(Status_Z) == true {
@@ -323,12 +373,13 @@ func Beq(self *Cpu) {
 	}
 }
 
-//TODO OH GOD WHAT IS THIS!
+// TODO OH GOD WHAT IS THIS!
 func Bit(self *Cpu) {
+	log.Fatalln("Missing Op Code")
 	fmt.Println("Running Op Bit")
 }
 
-//BMI  Branch on Result Minus
+// BMI  Branch on Result Minus
 func Bmi(self *Cpu) {
 	fmt.Println("Running Op Bmi")
 	if self.GetFlag(Status_N) == true {
@@ -336,7 +387,7 @@ func Bmi(self *Cpu) {
 	}
 }
 
-//BNE  Branch on Result not Zero
+// BNE  Branch on Result not Zero
 func Bne(self *Cpu) {
 	fmt.Println("Running Op Bne")
 	if self.GetFlag(Status_Z) == false {
@@ -397,7 +448,7 @@ func Clc(self *Cpu) {
 	self.SetFlag(Status_C, false)
 }
 
-//Clear Decimal Flag
+// Clear Decimal Flag
 func Cld(self *Cpu) {
 	fmt.Println("Running Op Cld")
 	self.SetFlag(Status_D, false)
@@ -411,16 +462,19 @@ func Clv(self *Cpu) {
 	self.SetFlag(Status_V, false)
 }
 func Cmp(self *Cpu) {
+	log.Fatalln("Missing Op Code")
 	fmt.Println("Running Op Cmp")
 }
 func Cpx(self *Cpu) {
+	log.Fatalln("Missing Op Code")
 	fmt.Println("Running Op Cpx")
 }
 func Cpy(self *Cpu) {
+	log.Fatalln("Missing Op Code")
 	fmt.Println("Running Op Cpy")
 }
 
-//DEC  Decrement Memory by One
+// DEC  Decrement Memory by One
 func Dec(self *Cpu) {
 	fmt.Println("Running Op Dec")
 	m := self.ReadAddressByte(self.address)
@@ -429,21 +483,21 @@ func Dec(self *Cpu) {
 	self.CheckNZ(m)
 }
 
-//DEX  Decrement Index X by One
+// DEX  Decrement Index X by One
 func Dex(self *Cpu) {
 	fmt.Println("Running Op Dex")
 	self.X--
 	self.CheckNZ(self.X)
 }
 
-//DEY  Decrement Index Y by One
+// DEY  Decrement Index Y by One
 func Dey(self *Cpu) {
 	fmt.Println("Running Op Dey")
 	self.Y--
 	self.CheckNZ(self.Y)
 }
 
-//EOR , Excluse OR
+// EOR , Excluse OR
 // A EOR M -> A
 func Eor(self *Cpu) {
 	fmt.Println("Running Op Eor")
@@ -452,7 +506,7 @@ func Eor(self *Cpu) {
 	self.CheckNZ(self.A)
 }
 
-//INC  Increment Memory by One
+// INC  Increment Memory by One
 func Inc(self *Cpu) {
 	fmt.Println("Running Op Inc")
 	m := self.ReadAddressByte(self.address)
@@ -468,32 +522,32 @@ func Inx(self *Cpu) {
 	self.CheckNZ(self.X)
 }
 
-//INY  Increment Y Reg by One
+// INY  Increment Y Reg by One
 func Iny(self *Cpu) {
 	fmt.Println("Running Op Iny")
 	self.Y++
 	self.CheckNZ(self.Y)
 }
 
-//JMP  Jump to new location
+// JMP  Jump to new location
 func Jmp(self *Cpu) {
 	fmt.Println("Running Op Jmp")
 	self.PC = self.address
 
 }
 
-//JSR  Jump and Store Current Position``
+// JSR  Jump and Store Current Position“
 func Jsr(self *Cpu) {
 	fmt.Println("Running Op Jsr")
 	self.Push16Bit(self.PC - 1) //-1 because uses 3 bytes so it moves PC +3 already.
 	self.PC = self.address
 }
 
-//Load memory (M) from Address (self.address) into Accumulator
+// Load memory (M) from Address (self.address) into Accumulator
 func Lda(self *Cpu) {
 	fmt.Println("Running Op Lda")
 	self.A = self.ReadAddressByte(self.address)
-	fmt.Printf("Setting Accumulator to.. %d (hex val of %x) \n ", self.A, self.A)
+	fmt.Printf("Setting Accumulator to value stored in self.address %x .. %d (hex val of %x) \n ", self.address, self.A, self.A)
 	self.CheckNZ(self.A)
 }
 func Ldx(self *Cpu) {
@@ -547,13 +601,13 @@ func Ora(self *Cpu) {
 	self.CheckNZ(self.A)
 }
 
-//PHA  Push Accumulator on Stack
+// PHA  Push Accumulator on Stack
 func Pha(self *Cpu) {
 	fmt.Println("Running Op Pha")
 	self.Push(self.A)
 }
 
-//PHP -  Push Processor Status on Stack
+// PHP -  Push Processor Status on Stack
 func Php(self *Cpu) {
 	fmt.Println("Running Op Php")
 	self.Push(self.S)
@@ -567,13 +621,15 @@ func Plp(self *Cpu) {
 	self.S = self.Pull()
 }
 func Rol(self *Cpu) {
+	log.Fatalln("Missing Op Code")
 	fmt.Println("Running Op Rol")
 }
 func Ror(self *Cpu) {
+	log.Fatalln("Missing Op Code")
 	fmt.Println("Running Op Ror")
 }
 
-//RTI - Return from Interupt
+// RTI - Return from Interupt
 // pull SR, pull PC
 func Rti(self *Cpu) {
 	fmt.Println("Running Op Rti")
@@ -581,7 +637,7 @@ func Rti(self *Cpu) {
 	self.PC = self.Pull16Bit()
 }
 
-//RTS  Return from Subroutine
+// RTS  Return from Subroutine
 // pull PC, PC+1 -> PC
 func Rts(self *Cpu) {
 	fmt.Println("Running Op Rts")
@@ -618,19 +674,19 @@ func Sbc(self *Cpu) {
 	}
 }
 
-//Set Status Flag of C - Carry Flag to on (00 10 00 00)
+// Set Status Flag of C - Carry Flag to on (00 10 00 00)
 func Sec(self *Cpu) { //Set Carry Flag
 	fmt.Println("Running Op Sec")
 	self.SetFlag(Status_C, true)
 }
 
-//Set Status Flag of D - Decimal Flag to on (00 00 01 00) | NOT USED IN NES
+// Set Status Flag of D - Decimal Flag to on (00 00 01 00) | NOT USED IN NES
 func Sed(self *Cpu) {
 	fmt.Println("Running Op Sed")
 	self.SetFlag(Status_D, true)
 }
 
-//Set Status Flag of I - Interupt Disable to on (00 00 01 00)
+// Set Status Flag of I - Interupt Disable to on (00 00 01 00)
 func Sei(self *Cpu) {
 	fmt.Println("Running Op Sei")
 	self.SetFlag(Status_I, true)
@@ -650,35 +706,35 @@ func Sty(self *Cpu) {
 	self.WriteMemory(self.address, self.Y)
 }
 
-//TAX Transfer Accumulator into index X
+// TAX Transfer Accumulator into index X
 func Tax(self *Cpu) {
 	fmt.Println("Running Op Tax")
 	self.X = self.A
 	self.CheckNZ(self.X)
 }
 
-//TAY Transfer Accumulator into index Y
+// TAY Transfer Accumulator into index Y
 func Tay(self *Cpu) {
 	fmt.Println("Running Op Tay")
 	self.Y = self.A
 	self.CheckNZ(self.Y)
 }
 
-//TSX Transfer Stack Pointer into Index X
+// TSX Transfer Stack Pointer into Index X
 func Tsx(self *Cpu) {
 	fmt.Printf("Running Op Tsx - Copying sp:%d to x:%d", self.SP, self.X)
 	self.X = self.SP
 	self.CheckNZ(self.Y)
 }
 
-//TXA  Transfer Index X to Accumulator
+// TXA  Transfer Index X to Accumulator
 func Txa(self *Cpu) {
 	fmt.Printf("Running Op Txa - copying x: %d to a: %d\n", self.X, self.A)
 	self.A = self.X
 	self.CheckNZ(self.A)
 }
 
-//TXS  Transfer Index X to Stack Register
+// TXS  Transfer Index X to Stack Register
 func Txs(self *Cpu) {
 	fmt.Println("Running Op Txs")
 	self.SP = self.X

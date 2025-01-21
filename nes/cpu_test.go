@@ -7,9 +7,9 @@ import (
 	Nes "github.com/bomer/nes/nes"
 )
 
-//TestNES - All unit tests are written in mariographical order.
-//That is, in the order required to run Mario on my emulator
-//Except in the case where there are mutliple accumulator versions, where I did those as well
+// TestNES - All unit tests are written in mariographical order.
+// That is, in the order required to run Mario on my emulator
+// Except in the case where there are mutliple accumulator versions, where I did those as well
 var nes Nes.Nes
 
 func Setup() {
@@ -281,7 +281,7 @@ func TestTSX(t *testing.T) {
 		t.Errorf("Failed to Copy SP -> Y correctly")
 	}
 
-	if nes.Cpu.GetFlag(Nes.Status_N) != false {
+	if nes.Cpu.GetFlag(Nes.Status_N) != true { // Bug fix 20/01/25
 		t.Errorf("Bady calculated Flags!")
 	}
 }
@@ -365,7 +365,7 @@ func TestTYA(t *testing.T) {
 	//Run and test
 	nes.Cpu.EmulateCycle()
 	if nes.Cpu.A != 222 {
-		t.Errorf("Failed to Copy X to A correctly")
+		t.Errorf("Failed to Copy Y to A correctly")
 	}
 
 	if nes.Cpu.GetFlag(Nes.Status_N) != true {
@@ -373,7 +373,7 @@ func TestTYA(t *testing.T) {
 	}
 }
 
-//0x69 ADC Add M To accumulator + C
+// 0x69 ADC Add M To accumulator + C
 func TestADC(t *testing.T) {
 	Setup()
 	nes.Cpu.PC = 0xaa
@@ -429,7 +429,7 @@ func TestADC(t *testing.T) {
 
 }
 
-//0xe9 SBC subtract M from accumulator + 1-C
+// 0xe9 SBC subtract M from accumulator + 1-C
 func TestSBC(t *testing.T) {
 	Setup()
 	nes.Cpu.PC = 0xaa
@@ -492,7 +492,7 @@ func TestSBC(t *testing.T) {
 
 }
 
-//0x29 , a = AND memory and A
+// 0x29 , a = AND memory and A
 func TestAND(t *testing.T) {
 	Setup()
 	nes.Cpu.PC = 0x29
@@ -520,7 +520,7 @@ func TestAND(t *testing.T) {
 	}
 }
 
-//0x09 , a = OR memory and A
+// 0x09 , a = OR memory and A
 func TestORA(t *testing.T) {
 	Setup()
 	nes.Cpu.PC = 0xaa
@@ -545,7 +545,7 @@ func TestORA(t *testing.T) {
 	}
 }
 
-//0x49 , a = OR memory and A
+// 0x49 , a = OR memory and A
 func TestEOR(t *testing.T) {
 	Setup()
 	nes.Cpu.PC = 0xaa
@@ -581,7 +581,7 @@ func TestEOR(t *testing.T) {
 	}
 }
 
-//0x0A, ASL, shift left
+// 0x0A, ASL, shift left
 func TestASL(t *testing.T) {
 	Setup()
 
@@ -645,7 +645,7 @@ func TestASL(t *testing.T) {
 
 }
 
-//0x90 Branch on Carry Clear
+// 0x90 Branch on Carry Clear
 func TestBCC(t *testing.T) {
 	Setup()
 	//0x50 (80), increment by 8.
@@ -694,7 +694,7 @@ func TestBCC(t *testing.T) {
 	}
 }
 
-//0xB0 Branch on Carry Set
+// 0xB0 Branch on Carry Set
 func TestBCS(t *testing.T) {
 	Setup()
 	//0x50 (80), increment by 8.
@@ -744,7 +744,7 @@ func TestBCS(t *testing.T) {
 	}
 }
 
-//0xB0 Branch on Carry Set
+// 0xB0 Branch on Carry Set
 func TestBEQ(t *testing.T) {
 	Setup()
 	//0x50 (80), increment by 8.
@@ -760,7 +760,7 @@ func TestBEQ(t *testing.T) {
 	}
 }
 
-//0x30 BMI  Branch on Result Minus
+// 0x30 BMI  Branch on Result Minus
 func TestBMI(t *testing.T) {
 	Setup()
 	//0x50 (80), increment by 8.
@@ -776,23 +776,36 @@ func TestBMI(t *testing.T) {
 	}
 }
 
-//0xD0 BNE  Branch on Result not Zero
+// 0xD0 BNE  Branch on Result not Zero
 func TestBNE(t *testing.T) {
 	Setup()
 	//0x50 (80), increment by 8.
 	nes.Cpu.PC = 80
 	nes.Cpu.Memory[0x50] = 0xD0
 	nes.Cpu.Memory[0x51] = 8
-	nes.Cpu.SetFlag(Nes.Status_N, true)
+	nes.Cpu.SetFlag(Nes.Status_Z, false)
 
 	nes.Cpu.EmulateCycle()
 
 	if nes.Cpu.PC != 90 { //80 + 8 + 2 (always add to to PC, pass or fail)
 		t.Errorf("Failed to branch PC by offset of 8, got %d", nes.Cpu.PC)
 	}
+
+	//Adding in a negative scenario as well.
+	//0x50 (80), increment by 2 as the status flag is not clear.
+	nes.Cpu.PC = 80
+	nes.Cpu.Memory[0x50] = 0xD0
+	nes.Cpu.Memory[0x51] = 8
+	nes.Cpu.SetFlag(Nes.Status_Z, true)
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.PC != 82 { //80 + 8 + 2 (always add to to PC, pass or fail)
+		t.Errorf("Failed test because it should not branch and only increment by 2, got %d", nes.Cpu.PC)
+	}
 }
 
-//0x10 BPL  Branch on Result Plus
+// 0x10 BPL  Branch on Result Plus
 func TestBPL(t *testing.T) {
 	Setup()
 	//0x50 (80), increment by 8.
@@ -808,7 +821,7 @@ func TestBPL(t *testing.T) {
 	}
 }
 
-//0x50 BVC  Branch on Overflow Clear
+// 0x50 BVC  Branch on Overflow Clear
 func TestBVC(t *testing.T) {
 	Setup()
 	//0x50 (80), increment by 8.
@@ -824,7 +837,7 @@ func TestBVC(t *testing.T) {
 	}
 }
 
-//0x70 BVS  Branch on Overflow Set
+// 0x70 BVS  Branch on Overflow Set
 func TestBvs(t *testing.T) {
 	Setup()
 	//0x50 (80), increment by 8.
@@ -840,7 +853,7 @@ func TestBvs(t *testing.T) {
 	}
 }
 
-//C6 DEC  Decrement Memory by One
+// C6 DEC  Decrement Memory by One
 func TestDEC(t *testing.T) {
 	Setup()
 	//0x50 (80), increment by 8.
@@ -857,7 +870,7 @@ func TestDEC(t *testing.T) {
 	}
 }
 
-//C6 DEX  Decrement X by One
+// C6 DEX  Decrement X by One
 func TestDEX(t *testing.T) {
 	Setup()
 	//0x50 (80), increment by 8.
@@ -873,7 +886,7 @@ func TestDEX(t *testing.T) {
 	}
 }
 
-//88 DEX  Decrement Y by One
+// 88 DEX  Decrement Y by One
 func TestDEY(t *testing.T) {
 	Setup()
 	//0x50 (80), increment by 8.
@@ -888,7 +901,7 @@ func TestDEY(t *testing.T) {
 	}
 }
 
-//0xE6 INC  Increment Memory by One
+// 0xE6 INC  Increment Memory by One
 func TestINC(t *testing.T) {
 	Setup()
 	//Memory goes from 100 to 101
@@ -905,7 +918,7 @@ func TestINC(t *testing.T) {
 	}
 }
 
-//0xE8 INX  Increment X by One
+// 0xE8 INX  Increment X by One
 func TestINX(t *testing.T) {
 	Setup()
 	//Memory goes from 100 to 101
@@ -921,7 +934,7 @@ func TestINX(t *testing.T) {
 	}
 }
 
-//0xC8 INY  Increment Y by One
+// 0xC8 INY  Increment Y by One
 func TestINY(t *testing.T) {
 	Setup()
 	//Memory goes from 100 to 101
@@ -936,7 +949,7 @@ func TestINY(t *testing.T) {
 	}
 }
 
-//0x48, PHA, push A. and 0x68, PULL A
+// 0x48, PHA, push A. and 0x68, PULL A
 func TestPHAandPLA(t *testing.T) {
 	Setup()
 	//Push 3 numbers into stack, then pop them off. 50, 60, 70. then, pop back
@@ -974,7 +987,7 @@ func TestPHAandPLA(t *testing.T) {
 	}
 }
 
-//0x08, PHP, push A. and 0x28, PULL A
+// 0x08, PHP, push A. and 0x28, PULL A
 func TestPHPandPLP(t *testing.T) {
 	Setup()
 	//Push 3 numbers into stack, then pop them off. 50, 60, 70. then, pop back
@@ -1012,7 +1025,7 @@ func TestPHPandPLP(t *testing.T) {
 	}
 }
 
-//0x4A,  Logical Shift Right
+// 0x4A,  Logical Shift Right
 func TestLSR(t *testing.T) {
 	Setup()
 	//Test 13 becomes...6 1101 > 0110 (carry on)
@@ -1090,7 +1103,7 @@ func TestNOP(t *testing.T) {
 	}
 }
 
-//0x00 BRK and RTI
+// 0x00 BRK and RTI
 // Dec 2021, Moving back PC check, after moving
 func TestBRK(t *testing.T) {
 	Setup()
