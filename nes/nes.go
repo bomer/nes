@@ -37,9 +37,9 @@ func (nes *Nes) Init() {
 	emuticker := time.NewTicker(time.Second / CyclesPerSecond) //TODO - Replace with nes CPU FREQ
 	for {
 		nes.Cpu.EmulateCycle()
-		if nes.Cpu.PC > 32781 {
-			Pause()
-		}
+		// if nes.Cpu.PC > 32781 {
+		// 	Pause()
+		// }
 		nes.Ppu.EmulateCycle()
 		nes.Ppu.EmulateCycle()
 		nes.Ppu.EmulateCycle()

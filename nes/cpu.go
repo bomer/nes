@@ -468,6 +468,7 @@ func Clv(self *Cpu) {
 
 // CMP - Compare Memory with Accumulator
 func Cmp(self *Cpu) {
+	fmt.Println("Running Op Cmp")
 	m := self.ReadAddressByte(self.address)
 	comparison := self.A - m
 	fmt.Printf("Comparing %d - %d = %d \n", self.A, m, comparison)
@@ -477,15 +478,36 @@ func Cmp(self *Cpu) {
 	} else {
 		self.SetFlag(Status_C, false)
 	}
-	fmt.Println("Running Op Cmp")
 }
+
+// CPX - Compare Memory and Index X
+// X - M
 func Cpx(self *Cpu) {
-	log.Fatalln("Missing Op Code")
 	fmt.Println("Running Op Cpx")
+	m := self.ReadAddressByte(self.address)
+	comparison := self.X - m
+	fmt.Printf("Comparing %d - %d = %d \n", self.X, m, comparison)
+	self.CheckNZ(comparison)
+	if self.X >= m {
+		self.SetFlag(Status_C, true)
+	} else {
+		self.SetFlag(Status_C, false)
+	}
 }
+
+// CMPY -Compare Memory and Index Y
+// Y - M
 func Cpy(self *Cpu) {
-	log.Fatalln("Missing Op Code")
 	fmt.Println("Running Op Cpy")
+	m := self.ReadAddressByte(self.address)
+	comparison := self.Y - m
+	fmt.Printf("Comparing %d - %d = %d \n", self.Y, m, comparison)
+	self.CheckNZ(comparison)
+	if self.Y >= m {
+		self.SetFlag(Status_C, true)
+	} else {
+		self.SetFlag(Status_C, false)
+	}
 }
 
 // DEC  Decrement Memory by One

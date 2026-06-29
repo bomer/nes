@@ -10,7 +10,7 @@ This a project that's been done many times before but in the realm of aspiriatio
 
 I have resumed this, after some on and off attempts over the years and am taking it more seriously.
 
-Done so far this year:
+Done so far this year (2023):
 
 - Loaded PPU Ram from the ROM which I previously had skipped
 - Wrote code to pull out memory of 2x CHR rom banks and load into arrays of 8x8 sprites to render in a test GUI
@@ -22,7 +22,9 @@ Done so far this year:
 - [ ] Load Background onto buffer and render
 - [ ] Memory Mirroring for PPU
 - [x] Load Sprites
-- [ ] Memory mapping to push updates to the PPU Memory, specifically OAM + attribute tables else screen will never update
+- [x] Memory Mapped PPU Memory Reads
+- [ ] Memory Map PPU memory Writes.
+- [ ] Memory Map OAM writes on 0x4014 + attribute tables else screen will never update
 - [ ] Controls mapping
 - [ ] Making mario fully playable
 
