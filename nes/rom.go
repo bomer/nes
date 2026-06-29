@@ -59,9 +59,10 @@ func (self *Rom) LoadGame(filename string, nes *Nes) {
 
 	ppuRam := rom[i+16 : i+8192+16]
 	println("Read CHR Bank of")
-	// fmt.Printf("ppu BANK %x\n", ppuRam)
 
 	copy(nes.Ppu.Memory[:], ppuRam)
+
+	// fmt.Printf("ppu BANK %x\n", nes.Ppu.Memory)
 
 	// This loads a array of sprites on the PPU for debug outputting.
 	nes.Ppu.GetInfoForPatternTable()

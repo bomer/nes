@@ -72,12 +72,68 @@ type Ppu struct {
 	PPUADDR   byte
 	PPUDATA   byte
 
+	PPUADDR16 uint16
+
+	// Data Bus - Used to simulate data going in and out for reading/writing addresses
+	DataBus byte
+	// One step behind, used for ppu data which gets the last buffered version and requets a new read
+	DataBusBuffer byte
+
 	// Internal registers
 	// The PPU also has 4 internal registers, described in detail on PPU scrolling:
 	v byte // v: During rendering, used for the scroll position. Outside of rendering, used as the current VRAM address.
 	t byte // t: During rendering, specifies the starting coarse-x scroll for the next scanline and the starting y scroll for the screen. Outside of rendering, holds the scroll or VRAM address before transferring it to v.
 	x byte // x: The fine-x position of the current scroll, used during rendering alongside v.
 	w byte // w: Toggles on each write to either PPUSCROLL or PPUADDR, indicating whether this is the first or second write. Clears on reads of PPUSTATUS. Sometimes called the 'write latch' or 'write toggle'.
+}
+
+// Returns Value of PPU Register, aligned with CPU mapping. 2000=0,2001=1
+func (p *Ppu) ReadRegister(register uint8) byte {
+	switch register {
+	//Status byte, resets the vblank when read and w write
+	case 2:
+		value := p.PPUSTATUS
+		p.PPUSTATUS &= 0x80
+		p.w = 0
+		p.DataBus = value
+		return value
+	case 4:
+		return p.OAM[p.OAMADDR]
+	case 7:
+		//Todo this isn't buffered properly
+		value := p.DataBusBuffer //p.PPUDATA[p.OAMADDR]
+		p.DataBus = value
+		return value
+
+	//Since only 2,4,7 are readable, we just return the Databus by default, some games need this
+	default:
+		return p.DataBus
+	}
+}
+
+// Returns Value of PPU Register, aligned with CPU mapping. 2000=0,2001=1
+func (p *Ppu) WriteRegister(register uint8, value uint8) byte {
+	p.DataBus = value
+	switch register {
+	//Status byte, resets the vblank when read and w write
+	case 2:
+		value := p.PPUSTATUS
+		p.PPUSTATUS &= 0x80
+		p.w = 0
+		p.DataBus = value
+		return value
+	case 4:
+		return p.OAM[p.OAMADDR]
+	case 7:
+		//Todo this isn't buffered properly
+		value := p.DataBusBuffer //p.PPUDATA[p.OAMADDR]
+		p.DataBus = value
+		return value
+
+	//Since only 2,4,7 are readable, we just return the Databus by default, some games need this
+	default:
+		return p.DataBus
+	}
 }
 
 const MaxRenderableScanlines = 239
@@ -106,15 +162,6 @@ func BooleanArrayFromByte(b byte) [8]bool {
 	}
 	return arrayOfBools
 }
-
-// 	fmt.Printf("Bit 2 %d \n", v&2 != 0)
-// 	fmt.Printf("Bit 3 %d \n", v&4 != 0)
-// 	fmt.Printf("Bit 4 %d \n", v&8 != 0)
-// 	fmt.Printf("Bit 5 %d \n", v&16 != 0)
-// 	fmt.Printf("Bit 6 %d \n", v&32 != 0)
-// 	fmt.Printf("Bit 7 %d \n", v&64 != 0)
-// 	fmt.Printf("Bit 8 %d \n", v&128 != 0)
-// }
 
 // Testing colors
 var Reset = "\033[0m"
@@ -211,15 +258,24 @@ func (p *Ppu) EmulateCycle() {
 	nameTableY := p.ScanLine / 8
 	nameTableAddress := 0x2000 + (nameTableY * 32) + nameTableX
 	nameTableEntry := p.Memory[nameTableAddress]
-	fmt.Printf("Getting NameTableData at Pos X/Y:%d/%d, with address 0x%x and value 0x%x \n ", nameTableX, nameTableY, nameTableAddress, nameTableEntry)
+	fmt.Printf("Scanline: %d, Cycle: %d, NameTableData Pos X/Y:%d/%d, with address 0x%x and value 0x%x \n ", p.ScanLine, p.Cycle, nameTableX, nameTableY, nameTableAddress, nameTableEntry)
 
 	//Get the background from the pattern Table.
 
 	//Get the attribute data to set the right colors.
 
 	//Handle PPU Control Updates
+	// TODO _ set  BG lsbitaddressonly
 	if p.ScanLine == 240 && p.Cycle == 0 {
-		p.PPUCTRL = 255
+
+	}
+	//Set Vblank
+	if p.ScanLine == 241 && p.Cycle == 1 {
+		p.SetRegisterValue(7, true, &p.PPUSTATUS)
+	}
+	//Set Vblank
+	if p.ScanLine == 261 && p.Cycle == 1 {
+		p.SetRegisterValue(7, false, &p.PPUSTATUS)
 	}
 
 	//Increment the count of overal cycles
@@ -228,10 +284,40 @@ func (p *Ppu) EmulateCycle() {
 		p.ScanLine++
 		p.Cycle = 0
 	}
+
+	// New Frame/Render on GoMobile
 	if p.ScanLine > MaxScanLines {
 		p.Frame++
+		Pause()
 		fmt.Printf("I have a frame ready to render frame %d !", p.Frame)
 		p.Cycle = 0
 		p.ScanLine = 0
 	}
+}
+
+// Used to set Flags valus on registers
+//
+// 7654 3210
+func (self *Ppu) SetRegisterValue(position int, tovalue bool, register *byte) {
+	fmt.Printf("Setting flag at positon %d to %t - ", position, tovalue)
+	fmt.Printf("Before - %b ", *register)
+	if tovalue {
+		*register |= 1 << uint8(position)
+	} else {
+		*register &= ^(1 << uint8(position))
+	}
+	fmt.Printf("After - %b \n", (*register))
+}
+
+// Used to read the register value at a position
+func (self *Ppu) GetRegisterValue(position int, register *byte) bool {
+	fmt.Printf("Getting flag at positon %d ", position)
+	var n byte
+	//Checking with logic and
+	n = *register & (1 << uint8(position))
+	if n == 0 {
+		return false
+	}
+	return true
+
 }

@@ -257,7 +257,7 @@ func TestTaY(t *testing.T) {
 	}
 }
 
-// 0xBA- Transfer Accumulator to Y
+// 0xBA- Transfer Accumulator to X
 func TestTSX(t *testing.T) {
 	Setup()
 	nes.Cpu.PC = 0xaa
@@ -1132,4 +1132,65 @@ func TestBRK(t *testing.T) {
 	if nes.Cpu.PC != 0xab {
 		t.Errorf("Should moved to 0xab, instead was %02x", nes.Cpu.PC)
 	}
+}
+
+// 0xC9 - CMP  Compare Memory with Accumulator
+// Dec 2026, Getting back into it!
+func TestCMP(t *testing.T) {
+	Setup()
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0xC9
+
+	// Test initial flag setup state
+	if nes.Cpu.GetFlag(Nes.Status_N) != false ||
+		nes.Cpu.GetFlag(Nes.Status_Z) != false ||
+		nes.Cpu.GetFlag(Nes.Status_C) != false {
+		t.Errorf("Bad initial flag setup!")
+	}
+
+	// Scenario 1, a > m (100>10)
+	nes.Cpu.Memory[0xab] = 10
+	nes.Cpu.A = 100
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.GetFlag(Nes.Status_N) != false {
+		t.Errorf("100-10, Failed N flag!")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_Z) != false {
+		t.Errorf("100-10, Failed Z flag!")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != true {
+		t.Errorf("100-10, Failed C flag!")
+	}
+
+	// Secnario 2, A < M  10-100 = -90 wrapped
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xab] = 100
+	nes.Cpu.A = 10
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.GetFlag(Nes.Status_N) != true {
+		t.Errorf("100-10, Failed N flag!")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_Z) != false {
+		t.Errorf("100-10, Failed Z flag!")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != false {
+		t.Errorf("100-10, Failed C flag!")
+	}
+
+	// Carry scenario
+	// Equal, 100-10=90. Negative=true, Z=False,C=false
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xab] = 10
+	nes.Cpu.A = 100
+	nes.Cpu.EmulateCycle()
+	if nes.Cpu.GetFlag(Nes.Status_N) != false {
+		t.Errorf("100-10, Failed N flag!")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_Z) != false {
+		t.Errorf("100-10, Failed Z flag!")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != true {
+		t.Errorf("100-10, Failed C flag!")
+	}
+
 }

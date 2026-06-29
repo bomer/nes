@@ -23,3 +23,16 @@ func Test0x15Color(t *testing.T) {
 		t.Error("Hex value issue with 0x15")
 	}
 }
+
+func TestVblankFlags(t *testing.T) {
+	ppuNes.Ppu.PPUSTATUS = 0
+	ppuNes.Ppu.ScanLine = 241
+	ppuNes.Ppu.Cycle = 1
+	if ppuNes.Ppu.PPUSTATUS != 0 {
+		t.Errorf("Error, Bad init state on vblank, got 0x%x", ppuNes.Ppu.PPUSTATUS)
+	}
+	ppuNes.Ppu.EmulateCycle()
+	if ppuNes.Ppu.PPUSTATUS != 0x80 {
+		t.Errorf("Error, Did not update PPU Status, got 0x%x", ppuNes.Ppu.PPUSTATUS)
+	}
+}

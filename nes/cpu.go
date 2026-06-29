@@ -106,17 +106,21 @@ func (self *Cpu) WriteMemory(address uint16, value byte) {
 // OAMDMA	$4014	AAAA AAAA	W	OAM DMA high address
 func (self *Cpu) ReadAddressByte(start uint16) uint8 {
 
-	if start == 0x2002 {
+	//Memory is mirrored for first 0x800/2k bytes
+	if start < 0x2000 {
+		return uint8(self.Memory[start&0x7FF])
+	}
+	if start >= 0x2000 && start < 0x4000 {
 		fmt.Printf("Got PPU Memory for PPUCTRL %d", self.System.Ppu.PPUCTRL)
-		return self.System.Ppu.PPUCTRL
+		return self.System.Ppu.ReadRegister(uint8(start & 0x7))
 	}
 
 	return uint8(self.Memory[start])
 }
 
 func (self *Cpu) ReadAddress(start uint16) uint16 {
-	b1 := uint16(self.Memory[start])
-	b2 := uint16(self.Memory[start+1])
+	b1 := uint16(self.ReadAddressByte(start))
+	b2 := uint16(self.ReadAddressByte(start + 1))
 	fmt.Printf("Op Code %02x , B1=%02x B2=%02x\n", self.instruction, b1, b2)
 	address := uint16(b2)<<8 | b1
 	return address
@@ -124,8 +128,8 @@ func (self *Cpu) ReadAddress(start uint16) uint16 {
 func (self *Cpu) ReadWrappedAddress(a uint16) uint16 {
 	//a:= passed
 	b := (a & 0xFF00) | uint16(byte(a)+1)
-	b1 := uint16(self.Memory[a])
-	b2 := uint16(self.Memory[b])
+	b1 := uint16(self.ReadAddressByte(a))
+	b2 := uint16(self.ReadAddressByte(b))
 	address := uint16(b2)<<8 | b1
 	return address
 }
@@ -236,7 +240,7 @@ func (self *Cpu) DecodeInstruction() {
 		address = uint16(uint16(self.Memory[self.PC+1]) + uint16(self.Y))
 
 	}
-	fmt.Printf("Got Address %02x", address)
+	fmt.Printf("Got Address %02x\n", address)
 
 	//Moving Increnement PC before??
 	self.PC += uint16(self.info.No_Bytes)
@@ -461,8 +465,18 @@ func Clv(self *Cpu) {
 	fmt.Println("Running Op Clv")
 	self.SetFlag(Status_V, false)
 }
+
+// CMP - Compare Memory with Accumulator
 func Cmp(self *Cpu) {
-	log.Fatalln("Missing Op Code")
+	m := self.ReadAddressByte(self.address)
+	comparison := self.A - m
+	fmt.Printf("Comparing %d - %d = %d \n", self.A, m, comparison)
+	self.CheckNZ(comparison)
+	if self.A >= m {
+		self.SetFlag(Status_C, true)
+	} else {
+		self.SetFlag(Status_C, false)
+	}
 	fmt.Println("Running Op Cmp")
 }
 func Cpx(self *Cpu) {
@@ -724,7 +738,7 @@ func Tay(self *Cpu) {
 func Tsx(self *Cpu) {
 	fmt.Printf("Running Op Tsx - Copying sp:%d to x:%d", self.SP, self.X)
 	self.X = self.SP
-	self.CheckNZ(self.Y)
+	self.CheckNZ(self.X)
 }
 
 // TXA  Transfer Index X to Accumulator
