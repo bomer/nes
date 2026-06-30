@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
+	"log/slog"
 
 	"github.com/bomer/nes/nes"
 	"golang.org/x/mobile/app"
@@ -32,15 +33,20 @@ var (
 	touchX   float32
 	touchY   float32
 
-	img glutil.Image
+	img *glutil.Image
 )
 
 func main() {
+
+	slog.SetLogLoggerLevel(slog.LevelError)
+	// slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	fmt.Printf("Initing...")
 	guiNes.Cpu.Quiet = true
 	guiNes.Rom.LoadGame("mario.nes", &guiNes)
 	// guiNes.Cpu.Quiet = false
+	guiNes.Cpu.System = &guiNes
+	guiNes.Ppu.System = &guiNes
 	go guiNes.Init()
 	// guiNes.Cpu
 
@@ -103,61 +109,70 @@ func onStart(glctx gl.Context) {
 	fps = debug.NewFPS(images)
 
 	//Buffer for display Buffer
-	img = *images.NewImage(256, 240)
+	img = images.NewImage(256, 240)
+
 }
 func onStop(glctx gl.Context) {
 	glctx.DeleteProgram(program)
 	glctx.DeleteBuffer(buf)
 	fps.Release()
 	images.Release()
+	img.Release()
 }
 
 func onPaint(glctx gl.Context, sz size.Event) {
 
-	glctx.ClearColor(1, 1, 1, 1)
-	glctx.Clear(gl.COLOR_BUFFER_BIT)
+	// glctx.ClearColor(1, 1, 1, 1)
+	// glctx.Clear(gl.COLOR_BUFFER_BIT)
 
 	glctx.UseProgram(program)
 
 	glctx.BindBuffer(gl.ARRAY_BUFFER, buf)
 
-	//Draw Pixels onto screen
-	// for i := 0; i < 64; i++ {
-	// for j := 0; j < 32; j++ {
-	// if myChip8.Gfx[(j*64)+i] == 0 {
-	// img.RGBA.Set(i, j, image.Black)
-	// }
-
-	// }
-	// }
-
-	// green := image.NewUniform(color.RGBA{0x00, 0x1f, 0x00, 0xff})
-	//For each 256 Sprites > Sprite = [8][8]uint8
-	count := 0
-	// countx := 0
-	county := 0
-	// xoffset := 0
-	xoffset := 0 //((count % 2) == 0) * 8
-	for _, sprite := range guiNes.Ppu.TileMap {
-		//For each row of pixels
-		for rowindex, arrayOfRows := range sprite {
-			//For each pixels in each row...
-			for pixelindex, pixelvalue := range arrayOfRows {
-				// fmt.Printf("Reading value of of $@ ", pixelvalue)
-				if pixelvalue != 0 {
-					img.RGBA.Set(pixelindex+xoffset, rowindex+county, guiNes.Ppu.GetColorFromPalette(int(pixelvalue+1)))
+	drawMode := "ppu" // "ppu" or "sprites"
+	if drawMode == "sprites" {
+		count := 0
+		// countx := 0
+		county := 0
+		// xoffset := 0
+		xoffset := 0 //((count % 2) == 0) * 8
+		for _, sprite := range guiNes.Ppu.TileMap {
+			//For each row of pixels
+			for rowindex, arrayOfRows := range sprite {
+				//For each pixels in each row...
+				for pixelindex, pixelvalue := range arrayOfRows {
+					// fmt.Printf("Reading value of of $@ ", pixelvalue)
+					if pixelvalue != 0 {
+						img.RGBA.Set(pixelindex+xoffset, rowindex+county, guiNes.Ppu.GetColorFromPalette(int(pixelvalue+1)))
+					}
 				}
 			}
+			count += 1
+			// if (count % 2) == 0 {
+			xoffset += 8
+			// }
+			if (count%16) == 0 && count > 0 {
+				county += 8
+				xoffset = 0
+			}
 		}
-		count += 1
-		// if (count % 2) == 0 {
-		xoffset += 8
-		// }
-		if (count%16) == 0 && count > 0 {
-			county += 8
-			xoffset = 0
-		}
+	} else {
 
+		ppu := guiNes.Ppu
+
+		// Step through the PPU dimensions
+		for y := 0; y < 240; y++ {
+			for x := 0; x < 256; x++ {
+				// Get the raw 0, 1, 2, or 3 color index from your PPU cycle loop
+				colorIndex := ppu.FullBuffer[x][y]
+
+				// Look up the corresponding RGBA color
+				pixelColor := guiNes.Ppu.GetColorFromPalette(int(colorIndex + 1))
+
+				// Draw it directly into the image buffer at the exact X/Y coordinate
+				img.RGBA.Set(x, y, pixelColor)
+			}
+		}
 	}
 
 	//Draw over whole screen
@@ -177,8 +192,8 @@ func onPaint(glctx gl.Context, sz size.Event) {
 	// fps.Draw(sz)
 
 	//cleanup every  frame
-	img.Release()
-	img = *images.NewImage(256, 224)
+
+	// img = *images.NewImage(256, 241)
 
 }
 

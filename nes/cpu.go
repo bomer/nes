@@ -293,7 +293,7 @@ func (self *Cpu) Init() {
 	// Test mode lookup table
 	// Debugf("Mode_Absolute %d \n", Mode_Absolute)
 	// Debugf("Mode_Absolute %+v \n", OpTable[0x00])
-	Pause()
+	// Pause()
 
 	self.PC = 0xFFFC //Loads back a step then reads ahead like a normal op code
 	self.PC = self.ReadAddress(self.PC)
@@ -951,7 +951,9 @@ func Tya(self *Cpu) {
 // The PPU directly sets this via a status flag
 func Nmi(self *Cpu) {
 	Debugf("=== HARDWARE INTERRUPT: NMI TRIGGERED ===")
-	Pause()
+	if self.Debug {
+		Pause()
+	}
 
 	// 1. Push the current Program Counter onto the stack (High byte first, then Low)
 	self.Push16Bit(self.PC)

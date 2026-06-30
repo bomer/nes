@@ -363,9 +363,9 @@ func (p *Ppu) EmulateCycle() {
 	// New Frame/Render on GoMobile
 	if p.ScanLine > MaxScanLines {
 		p.Frame++
-		p.RenderTerminalFrame()
-		Debugf("I have rendered a frame %d !", p.Frame)
-		Pause()
+		// p.RenderTerminalFrame()
+		// fmt.Printf("I have rendered a frame %d !", p.Frame)
+		// Pause()
 		p.Cycle = 0
 		p.ScanLine = 0
 	}

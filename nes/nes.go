@@ -22,7 +22,7 @@ func Pause() {
 
 // CyclesPerSecond = 1.79mhz
 const CyclesPerSecond = 1789773
-const CyclesPerFrame = 29780.5
+const CyclesPerFrame = 29780
 
 // Init Starts NES system. This controls the main loop and emulation of CPU Cycles
 func (nes *Nes) Init() {
@@ -34,18 +34,31 @@ func (nes *Nes) Init() {
 	//Run emulator on another go-routine
 	//Else emulator runs to slow on main thread.
 	// go func() {
+	// Target 60 Frames Per Second (approx 16.67ms per frame)
+	frameTicker := time.NewTicker(time.Second / 60)
+	defer frameTicker.Stop()
 
-	emuticker := time.NewTicker(time.Second / CyclesPerSecond) //TODO - Replace with nes CPU FREQ
 	for {
-		nes.Cpu.EmulateCycle()
-		// if nes.Cpu.PC > 32781 {
-		// 	Pause()
-		// }
-		nes.Ppu.EmulateCycle()
-		nes.Ppu.EmulateCycle()
-		nes.Ppu.EmulateCycle()
-		<-emuticker.C
+		// Run a whole frame's worth of cycles as fast as native Go can loop
+		cyclesThisFrame := 0
+		for cyclesThisFrame < CyclesPerFrame {
+
+			// Execute 1 CPU cycle
+			nes.Cpu.EmulateCycle()
+
+			// Execute 3 PPU cycles for every 1 CPU cycle
+			nes.Ppu.EmulateCycle()
+			nes.Ppu.EmulateCycle()
+			nes.Ppu.EmulateCycle()
+
+			cyclesThisFrame++
+		}
+
+		// Now that a full frame is drawn, wait here to throttle it to 60 FPS
+		<-frameTicker.C
+
+		// (Optional) This is where you would blit your FullBuffer to a GUI
+		// or clear it for the next frame!
 	}
-	// }()
 
 }
