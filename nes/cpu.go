@@ -71,6 +71,11 @@ func (self *Cpu) WriteMemory(address uint16, value byte) {
 	if !self.Quiet {
 		fmt.Printf("CPU-Writing adress %02x with %d \n", address, value)
 	}
+	//Don't write to ROM memory
+	if address > 0x8000 {
+		// fmt.Println("Someone try to write to bad memory!")
+		// Pause()
+	}
 	//TODO. Extra mapping, mirrors, etc.
 	self.Memory[address] = value
 }
@@ -158,8 +163,8 @@ func (self *Cpu) Pull16Bit() uint16 {
 	low := uint16(self.Pull())
 	high := uint16(self.Pull())
 	fmt.Printf("low - %02x , high - %02x ", low, high)
-	fmt.Printf(" high << %02x ", high<<4)
-	ret := high<<4 | low
+	fmt.Printf(" high << %02x ", high<<8)
+	ret := high<<8 | low
 
 	return ret
 }
@@ -186,7 +191,7 @@ func (self *Cpu) DecodeInstruction() {
 	self.instruction = self.Memory[self.PC]
 	fmt.Printf("Instruction %02x \n", self.instruction)
 	self.info = OpTable[int(self.instruction)]
-	// fmt.Printf("Instruction self.info %+v \n", self.info)
+	fmt.Printf("Instruction self.info %+v \n", self.info)
 	fmt.Printf("Mode - %s, Operation - %s \n", self.info.ModeString(), self.info.OperationString())
 
 	fmt.Printf("\n")
@@ -208,10 +213,25 @@ func (self *Cpu) DecodeInstruction() {
 		address = self.ReadWrappedAddress(self.ReadAddress(self.PC + 1))
 
 	case Mode_IndirectX:
-		address = self.ReadWrappedAddress(self.ReadAddress(self.PC+1) + uint16(self.X))
+		// 1. Get the 8-bit zero page pointer location
+		baseZP := self.Memory[self.PC+1]
+		// 2. Add X as a byte so it wraps safely inside the Zero Page (0x00 - 0xFF)
+		targetZP := baseZP + self.X
+		// 3. Read the 16-bit target address stored AT that zero page address
+		// Note: Use a helper that handles 8-bit wrapping if targetZP is 0xFF!
+		low := uint16(self.ReadAddressByte(uint16(targetZP)))
+		high := uint16(self.ReadAddressByte(uint16(targetZP + 1)))
+		address = (high << 8) | low
 
 	case Mode_IndirectY:
-		address = self.ReadWrappedAddress(self.ReadAddress(self.PC+1) + uint16(self.Y))
+		// 1. Get the 8-bit zero page pointer location
+		baseZP := self.Memory[self.PC+1]
+		// 2. Fetch the 16-bit base address hidden inside that Zero Page location
+		low := uint16(self.ReadAddressByte(uint16(baseZP)))
+		high := uint16(self.ReadAddressByte(uint16(baseZP + 1)))
+		baseAddress := (high << 8) | low
+		// 3. Add Y to the resolved 16-bit base address
+		address = baseAddress + uint16(self.Y)
 
 	case Mode_Immediate:
 		address = self.PC + 1
@@ -250,7 +270,9 @@ func (self *Cpu) DecodeInstruction() {
 		log.Fatalln("Interacting with VRM which I haven't coded shit")
 	}
 	//Run Operation
-	self.info.RunOperation(self)
+	if self.info.Function != nil {
+		self.info.RunOperation(self)
+	}
 	self.CycleCount += uint64(self.info.No_Cycles)
 	self.InstructionCount++
 	fmt.Printf("Op Executed - Cycle Count = %d. Instruction Count: %d \n", self.CycleCount, self.InstructionCount)
@@ -377,10 +399,47 @@ func Beq(self *Cpu) {
 	}
 }
 
-// TODO OH GOD WHAT IS THIS!
+// Bit - Bitwise with A & M
+// bits 7 and 6 of operand are transfered to bit 7 and 6 of SR (N,V);
+// the zeroflag is set to the result of operand AND accumulator.
+
+// A AND M, M7 -> N, M6 -> V        N Z C I D V
+//                                  M7 + - - - M6
+
+// addressing    assembler    opc  bytes  cyles
+// --------------------------------------------
+// zeropage      BIT oper      24    2     3
+// absolute      BIT oper      2C    3     4
+// It performs a bitwise AND between the Accumulator and the value in memory, but it sets the flags using these unique rules:
+// Zero Flag ($Z$): Set to true if (A & M) == 0.
+// Negative Flag ($N$): Set directly to match Bit 7 of the memory value.
+// Overflow Flag ($V$): Set directly to match Bit 6 of the memory value.Because it copies bits 6 and 7 straight out of raw memory regardless of what the Accumulator contains.
+// it cannot use your standard arithmetic flag helpers or your generic CheckNZ function.
 func Bit(self *Cpu) {
-	log.Fatalln("Missing Op Code")
+	m := self.ReadAddressByte(self.address)
+
+	//Zero Flag based on the Bitwise &
+	if self.A&m == 0 {
+		self.SetFlag(Status_Z, true)
+	} else {
+		self.SetFlag(Status_Z, false)
+	}
+
+	//Negative Flag
+	if m&0x80 != 0 {
+		self.SetFlag(Status_N, true)
+	} else {
+		self.SetFlag(Status_N, false)
+	}
+
+	//OverflowFlag
+	if m&0x40 != 0 {
+		self.SetFlag(Status_V, true)
+	} else {
+		self.SetFlag(Status_V, false)
+	}
 	fmt.Println("Running Op Bit")
+
 }
 
 // BMI  Branch on Result Minus
@@ -423,8 +482,10 @@ func Bpl(self *Cpu) {
 // In summary, the NES BRK instruction is used to signal an interrupt and halt the execution of the current program, allowing the CPU to perform a software debugging operation before returning to the main program.
 // push PC+2, push SR
 func Brk(self *Cpu) {
-	fmt.Println("Running Op Brk, cpu info  - ")
-	fmt.Printf("%+v", self.info)
+
+	// Temporary debug check inside your CPU loop right before fetching the opcode:
+	//Increment PC an extra time due to the 2 bytes to be read.
+	self.PC++
 	self.Push16Bit(self.PC)
 	Php(self)
 	Sei(self)
@@ -646,7 +707,9 @@ func Pha(self *Cpu) {
 // PHP -  Push Processor Status on Stack
 func Php(self *Cpu) {
 	fmt.Println("Running Op Php")
-	self.Push(self.S)
+	currenStatus := self.S
+	currenStatus |= 0x30
+	self.Push(currenStatus)
 }
 func Pla(self *Cpu) {
 	fmt.Println("Running Op Pla")

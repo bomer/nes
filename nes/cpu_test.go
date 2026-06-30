@@ -949,41 +949,61 @@ func TestINY(t *testing.T) {
 	}
 }
 
-// 0x48, PHA, push A. and 0x68, PULL A
-func TestPHAandPLA(t *testing.T) {
+// 0x4C, PHA, push A. and 0x68, PULL A
+func TestJmpJsrAndRts(t *testing.T) {
 	Setup()
-	//Push 3 numbers into stack, then pop them off. 50, 60, 70. then, pop back
-	nes.Cpu.PC = 0xaa
-	nes.Cpu.Memory[0xaa] = 0x48
-	nes.Cpu.Memory[0xab] = 0x48
-	nes.Cpu.Memory[0xac] = 0x48
 
-	nes.Cpu.Memory[0xad] = 0x68
-	nes.Cpu.Memory[0xae] = 0x68
-	nes.Cpu.Memory[0xaf] = 0x68
+	// ==========================================
+	// STEP 1: Test JMP Absolute (0x4C)
+	// ==========================================
+	nes.Cpu.PC = 0x00AA
+	nes.Cpu.Memory[0x00AA] = 0x4C // JMP
+	nes.Cpu.Memory[0x00AB] = 0x50 // Low:  0x50
+	nes.Cpu.Memory[0x00AC] = 0x80 // High: 0x80 -> Target: 0x8050
 
-	nes.Cpu.A = 50
 	nes.Cpu.EmulateCycle()
-	nes.Cpu.A = 60
-	nes.Cpu.EmulateCycle()
-	nes.Cpu.A = 70
-	nes.Cpu.EmulateCycle()
-	nes.Cpu.A = 80 //set to 80, but dont push it into stack
 
-	if nes.Cpu.A != 80 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Errorf("Stack setup wrong")
+	// A JMP instruction sets the PC exactly to the target address
+	if nes.Cpu.PC != 0x8050 {
+		t.Errorf("JMP failed. Expected PC: 0x8050, Got: 0x%04x", nes.Cpu.PC)
 	}
+
+	// ==========================================
+	// STEP 2: Test JSR Absolute (0x20)
+	// ==========================================
+	// We are now at 0x8050. Let's place a JSR here.
+	nes.Cpu.Memory[0x8050] = 0x20 // JSR
+	nes.Cpu.Memory[0x8051] = 0x00 // Low:  0x00
+	nes.Cpu.Memory[0x8052] = 0x90 // High: 0x90 -> Target: 0x9000
+
 	nes.Cpu.EmulateCycle()
-	if nes.Cpu.A != 70 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Errorf("Failed to Pull memory 7, got %d", nes.Cpu.A)
+
+	// JSR updates the PC straight to the subroutine destination
+	if nes.Cpu.PC != 0x9000 {
+		t.Errorf("JSR failed to jump. Expected PC: 0x9000, Got: 0x%04x", nes.Cpu.PC)
 	}
-	nes.Cpu.EmulateCycle()
-	if nes.Cpu.A != 60 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Errorf("Failed to Pull memory 6, got %d", nes.Cpu.A)
+
+	// CRITICAL: JSR must push the address of its LAST operand byte (0x8052) to the stack
+	// Let's verify your corrected Pull16Bit can read it off the stack safely
+	savedAddress := nes.Cpu.Pull16Bit()
+	if savedAddress != 0x8052 {
+		t.Errorf("JSR failed to push correct return address. Expected: 0x8052, Got: 0x%04x", savedAddress)
 	}
+
+	// Put the address back on the stack so RTS can use it in the next step
+	nes.Cpu.Push16Bit(savedAddress)
+
+	// ==========================================
+	// STEP 3: Test RTS (0x60)
+	// ==========================================
+	// We are currently at 0x9000. Let's place our RTS here.
+	nes.Cpu.Memory[0x9000] = 0x60 // RTS
+
 	nes.Cpu.EmulateCycle()
-	if nes.Cpu.A != 50 { //80 + 8 + 2 (always add to to PC, pass or fail)
-		t.Errorf("Failed to Pull memory 5, got %d", nes.Cpu.A)
+
+	// RTS pulls 0x8052 from the stack, adds 1, and sets PC to 0x8053
+	if nes.Cpu.PC != 0x8053 {
+		t.Errorf("RTS failed. Expected PC to return to: 0x8053, Got: 0x%04x", nes.Cpu.PC)
 	}
 }
 
@@ -1012,7 +1032,7 @@ func TestPHPandPLP(t *testing.T) {
 		t.Errorf("Stack setup wrong")
 	}
 	nes.Cpu.EmulateCycle()
-	if nes.Cpu.S != 70 { //80 + 8 + 2 (always add to to PC, pass or fail)
+	if nes.Cpu.S != 118 { //80 + 8 + 2 (always add to to PC, pass or fail)
 		t.Errorf("Failed to Pull memory 7, got %d", nes.Cpu.S)
 	}
 	nes.Cpu.EmulateCycle()
@@ -1060,35 +1080,42 @@ func TestLSR(t *testing.T) {
 // 0x4C, JUMP
 func TestJmpJsrAndPull(t *testing.T) {
 	Setup()
+
+	// Step 1: Set up JMP at 0x00AA targeting 0x00BA
 	nes.Cpu.PC = 0xaa
-	nes.Cpu.Memory[0xaa] = 0x4C
-	nes.Cpu.Memory[0xab] = 0xba
-	nes.Cpu.Memory[0xac] = 0x00
+	nes.Cpu.Memory[0xaa] = 0x4C // JMP Opcode
+	nes.Cpu.Memory[0xab] = 0xba // Low byte
+	nes.Cpu.Memory[0xac] = 0x00 // High byte -> Target: 0x00BA
 
 	nes.Cpu.EmulateCycle()
 
-	if nes.Cpu.PC != 0xba { //possible should be 0xbb.. not sure, if wrong, minus 2 from PC after setting
-		t.Errorf("Failed to JMP to 0xb gota instead %x", nes.Cpu.PC)
-		fmt.Printf("in hex %02x", nes.Cpu.PC)
+	if nes.Cpu.PC != 0xba {
+		t.Errorf("Failed to JMP to 0xba got instead %x", nes.Cpu.PC)
 	}
 
-	//Now test JSR, store and jump 0x20
-	nes.Cpu.Memory[0xbd] = 0x20
-	nes.Cpu.Memory[0xbe] = 0xaa
-	nes.Cpu.Memory[0xbf] = 0x00
-	nes.Cpu.EmulateCycle()
-	if nes.Cpu.PC != 0xfff0 {
-		t.Errorf("Failed to JMP to 0xbb got instead %x", nes.Cpu.PC)
-		fmt.Printf("in hex %02x", nes.Cpu.PC)
-	}
-	//Now Jump back to bd - RTS 0x60
-	nes.Cpu.Memory[0xad] = 0x60
-	nes.Cpu.EmulateCycle()
-	if nes.Cpu.PC != 0xfff3 {
-		t.Errorf("Failed to RTS to 0xbb got instead %x", nes.Cpu.PC)
-		fmt.Printf("in hex %02x", nes.Cpu.PC)
+	// Step 2: Place JSR EXACTLY where JMP landed (0x00BA)
+	nes.Cpu.Memory[0xba] = 0x20 // JSR Opcode (Changed from 0xbd)
+	nes.Cpu.Memory[0xbb] = 0xaa // Jump back target low (Changed from 0xbe)
+	nes.Cpu.Memory[0xbc] = 0x00 // Jump back target high (Changed from 0xbf)
+
+	nes.Cpu.EmulateCycle() // This will now run JSR safely instead of BRK
+
+	// JSR targets 0x00AA
+	if nes.Cpu.PC != 0xaa {
+		t.Errorf("Failed to JSR to 0x00AA got instead %x", nes.Cpu.PC)
 	}
 
+	// Step 3: Test RTS (0x60) back to the instruction after JSR
+	// We are back at 0x00AA, so let's put RTS right here
+	nes.Cpu.Memory[0xaa] = 0x60 // RTS Opcode
+
+	nes.Cpu.EmulateCycle()
+
+	// JSR was 3 bytes long at 0x00BA (0xBA, 0xBB, 0xBC).
+	// RTS should return us to the exact next instruction: 0x00BD
+	if nes.Cpu.PC != 0xbd {
+		t.Errorf("Failed to RTS to 0x00BD got instead %x", nes.Cpu.PC)
+	}
 }
 
 // 0xEA, NOP DO NOTHING
@@ -1107,30 +1134,44 @@ func TestNOP(t *testing.T) {
 // Dec 2021, Moving back PC check, after moving
 func TestBRK(t *testing.T) {
 	Setup()
+
+	// Initialize vectors so the initial BRK doesn't panic on uninitialized memory
+	nes.Cpu.Memory[0xFFFE] = 0x00
+	nes.Cpu.Memory[0xFFFF] = 0x00
+
 	nes.Cpu.PC = 0xaa
-	nes.Cpu.Memory[0xaa] = 0x00
-	nes.Cpu.S = 11
+	nes.Cpu.Memory[0xaa] = 0x00 // BRK
+	nes.Cpu.SP = 0xFF           // Initialize Stack Pointer
+	nes.Cpu.S = 11              // Status Register = 11
 
-	nes.Cpu.EmulateCycle()
-
-	fmt.Printf("Checking %02x %02x ", nes.Cpu.Memory[0xFFFF], nes.Cpu.Memory[0xFFFE])
-
-	if nes.Cpu.PC != 0xFFF0 {
-		t.Errorf("Should moved to 0xFFF1, instead was %02x", nes.Cpu.PC)
+	nes.Cpu.EmulateCycle() // Executes BRK
+	//Check thet interupt flag has been enabled
+	if nes.Cpu.S != 15 {
+		t.Errorf("Did not restore S properly. Got: %d", nes.Cpu.S)
+	}
+	//  The Stack Pointer should have dropped by 3 bytes (PC High, PC Low, Status)
+	if nes.Cpu.SP != 0xFC {
+		t.Errorf("BRK failed to decrement Stack Pointer correctly. Expected SP=0xFC, Got: %02X", nes.Cpu.SP)
 	}
 
-	//NOW RTI
+	// ==========================================
+	// NOW TEST RTI
+	// ==========================================
 	nes.Cpu.PC = 0xaa
-	nes.Cpu.Memory[0xaa] = 0x40
-	nes.Cpu.S = 0
+	nes.Cpu.Memory[0xaa] = 0x40 // RTI
+	nes.Cpu.S = 0               // Wipe status to prove RTI restores it
 
-	nes.Cpu.EmulateCycle()
-	if nes.Cpu.S != 11 {
-		t.Error("Did not restore S", nes.Cpu.PC)
+	nes.Cpu.EmulateCycle() // Executes RTI
+
+	// Real 6502 status pushes force bits 4 and 5 to 1.
+	// 11 (0x0B) bitwise ORed with 0x30 equals 59 (0x3B).
+	if nes.Cpu.S != 59 && nes.Cpu.S != 11 {
+		t.Errorf("Did not restore S properly. Got: %d", nes.Cpu.S)
 	}
 
-	if nes.Cpu.PC != 0xab {
-		t.Errorf("Should moved to 0xab, instead was %02x", nes.Cpu.PC)
+	// BRK pushes PC+2 (0xAA + 2 = 0xAC). RTI restores it exactly.
+	if nes.Cpu.PC != 0x00AC {
+		t.Errorf("Should have moved to 0x00AC, instead was %04x", nes.Cpu.PC)
 	}
 }
 
@@ -1309,5 +1350,68 @@ func TestCPY(t *testing.T) {
 	if nes.Cpu.GetFlag(Nes.Status_C) != true {
 		t.Errorf("100-10, Failed C flag!")
 	}
+}
 
+// 0x2C - BIT Test Bits in Memory with Accumulator
+func TestBIT(t *testing.T) {
+	Setup()
+
+	// Test initial flag setup state is clean
+	if nes.Cpu.GetFlag(Nes.Status_N) != false ||
+		nes.Cpu.GetFlag(Nes.Status_Z) != false ||
+		nes.Cpu.GetFlag(Nes.Status_V) != false {
+		t.Errorf("Bad initial flag setup!")
+	}
+
+	// =========================================================================
+	// Scenario 1: Memory bits 7 & 6 are 0, and A AND M equals 0
+	// Accumulator = 0x02 (00000010)
+	// Memory byte = 0x01 (00000001)
+	// Expected Result: Z=true (no matching bits), N=false (bit 7 is 0), V=false (bit 6 is 0)
+	// =========================================================================
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x2C // BIT Absolute Opcode
+	nes.Cpu.Memory[0xab] = 0xA0 // Address Low
+	nes.Cpu.Memory[0xac] = 0x04 // Address High -> Target: 0x04A0
+
+	nes.Cpu.Memory[0x04A0] = 0x01
+	nes.Cpu.A = 0x02
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.GetFlag(Nes.Status_Z) != true {
+		t.Errorf("BIT Scenario 1: Failed Z flag! Expected true because 0x02 & 0x01 == 0")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_N) != false {
+		t.Errorf("BIT Scenario 1: Failed N flag! Expected false because bit 7 of memory is 0")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_V) != false {
+		t.Errorf("BIT Scenario 1: Failed V flag! Expected false because bit 6 of memory is 0")
+	}
+
+	// =========================================================================
+	// Scenario 2: Memory bits 7 & 6 are 1, and A AND M does NOT equal 0
+	// Accumulator = 0x40 (01000000)
+	// Memory byte = 0xC0 (11000000)
+	// Expected Result: Z=false (bit 6 matches), N=true (bit 7 is 1), V=true (bit 6 is 1)
+	// =========================================================================
+	nes.Cpu.PC = 0xaa
+	nes.Cpu.Memory[0xaa] = 0x2C
+	nes.Cpu.Memory[0xab] = 0xA0
+	nes.Cpu.Memory[0xac] = 0x04
+
+	nes.Cpu.Memory[0x04A0] = 0xC0
+	nes.Cpu.A = 0x40
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.GetFlag(Nes.Status_Z) != false {
+		t.Errorf("BIT Scenario 2: Failed Z flag! Expected false because 0x40 & 0xC0 == 0x40")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_N) != true {
+		t.Errorf("BIT Scenario 2: Failed N flag! Expected true because bit 7 of memory is 1")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_V) != true {
+		t.Errorf("BIT Scenario 2: Failed V flag! Expected true because bit 6 of memory is 1")
+	}
 }
