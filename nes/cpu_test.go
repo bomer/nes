@@ -1415,3 +1415,143 @@ func TestBIT(t *testing.T) {
 		t.Errorf("BIT Scenario 2: Failed V flag! Expected true because bit 6 of memory is 1")
 	}
 }
+
+func TestROL_AccumulatorAndMemory(t *testing.T) {
+	Setup()
+
+	// =========================================================================
+	// Scenario 1: ROL Accumulator (Opcode: 0x2A)
+	// Initial: Accumulator = 0x81 (10000001), Carry Flag = false (0)
+	//
+	// Math:
+	// - Outgoing Bit 7 is '1' -> New Carry must become true
+	// - Incoming Old Carry is '0' -> Bit 0 must become 0
+	// - Shifted value: (0x81 << 1) = 0x02
+	// Expected Result: A = 0x02, Carry = true, Zero = false, Negative = false
+	// =========================================================================
+	nes.Cpu.PC = 0x00AA
+	nes.Cpu.Memory[0x00AA] = 0x2A // ROL Accumulator Opcode
+
+	nes.Cpu.A = 0x81
+	nes.Cpu.SetFlag(Nes.Status_C, false) // Old carry is 0
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.A != 0x02 {
+		t.Errorf("ROL Accumulator: Wrong result in A. Expected: 0x02, Got: 0x%02X", nes.Cpu.A)
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != true {
+		t.Errorf("ROL Accumulator: Failed to push Bit 7 to Carry. Expected: true")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_Z) != false {
+		t.Errorf("ROL Accumulator: Zero flag wrong. Expected: false")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_N) != false {
+		t.Errorf("ROL Accumulator: Negative flag wrong. Expected: false")
+	}
+
+	// =========================================================================
+	// Scenario 2: ROL Absolute Memory (Opcode: 0x2E)
+	// Target Address: 0x04A0
+	// Initial: Memory[0x04A0] = 0x40 (01000000), Carry Flag = true (1)
+	//
+	// Math:
+	// - Outgoing Bit 7 is '0' -> New Carry must become false
+	// - Incoming Old Carry is '1' -> Bit 0 must become 1
+	// - Shifted value: (0x40 << 1) | 1 = 0x81 (10000001)
+	// Expected Result: Memory[0x04A0] = 0x81, Carry = false, Zero = false, Negative = true
+	// =========================================================================
+	nes.Cpu.PC = 0x00AA
+	nes.Cpu.Memory[0x00AA] = 0x2E // ROL Absolute Opcode
+	nes.Cpu.Memory[0x00AB] = 0xA0 // Target Low
+	nes.Cpu.Memory[0x00AC] = 0x04 // Target High -> 0x04A0
+
+	nes.Cpu.Memory[0x04A0] = 0x40
+	nes.Cpu.SetFlag(Nes.Status_C, true) // Old carry is 1
+
+	nes.Cpu.EmulateCycle()
+
+	finalMemoryValue := nes.Cpu.Memory[0x04A0]
+	if finalMemoryValue != 0x81 {
+		t.Errorf("ROL Memory: Wrong result in memory. Expected: 0x81, Got: 0x%02X", finalMemoryValue)
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != false {
+		t.Errorf("ROL Memory: Failed to push Bit 7 to Carry. Expected: false")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_Z) != false {
+		t.Errorf("ROL Memory: Zero flag wrong. Expected: false")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_N) != true {
+		t.Errorf("ROL Memory: Negative flag wrong. Expected: true because Bit 7 of result is 1")
+	}
+}
+
+func TestROR_AccumulatorAndMemory(t *testing.T) {
+	Setup()
+
+	// =========================================================================
+	// Scenario 1: ROR Accumulator (Opcode: 0x6A)
+	// Initial: Accumulator = 0x01 (00000001), Carry Flag = true (1)
+	//
+	// Math:
+	// - Outgoing Bit 0 is '1' -> New Carry must become true
+	// - Incoming Old Carry is '1' -> Bit 7 must become 1 (0x80)
+	// - Shifted value: (0x01 >> 1) | 0x80 = 0x80 (10000000)
+	// Expected Result: A = 0x80, Carry = true, Zero = false, Negative = true
+	// =========================================================================
+	nes.Cpu.PC = 0x00AA
+	nes.Cpu.Memory[0x00AA] = 0x6A // ROR Accumulator Opcode
+
+	nes.Cpu.A = 0x01
+	nes.Cpu.SetFlag(Nes.Status_C, true) // Old carry is 1
+
+	nes.Cpu.EmulateCycle()
+
+	if nes.Cpu.A != 0x80 {
+		t.Errorf("ROR Accumulator: Wrong result in A. Expected: 0x80, Got: 0x%02X", nes.Cpu.A)
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != true {
+		t.Errorf("ROR Accumulator: Failed to push Bit 0 to Carry. Expected: true")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_Z) != false {
+		t.Errorf("ROR Accumulator: Zero flag wrong. Expected: false")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_N) != true {
+		t.Errorf("ROR Accumulator: Negative flag wrong. Expected: true because Bit 7 became 1")
+	}
+
+	// =========================================================================
+	// Scenario 2: ROR Absolute Memory (Opcode: 0x6E)
+	// Target Address: 0x04A0
+	// Initial: Memory[0x04A0] = 0x80 (10000000), Carry Flag = false (0)
+	//
+	// Math:
+	// - Outgoing Bit 0 is '0' -> New Carry must become false
+	// - Incoming Old Carry is '0' -> Bit 7 must become 0
+	// - Shifted value: (0x80 >> 1) | 0 = 0x40 (01000000)
+	// Expected Result: Memory[0x04A0] = 0x40, Carry = false, Zero = false, Negative = false
+	// =========================================================================
+	nes.Cpu.PC = 0x00AA
+	nes.Cpu.Memory[0x00AA] = 0x6E // ROR Absolute Opcode
+	nes.Cpu.Memory[0x00AB] = 0xA0 // Target Low
+	nes.Cpu.Memory[0x00AC] = 0x04 // Target High -> 0x04A0
+
+	nes.Cpu.Memory[0x04A0] = 0x80
+	nes.Cpu.SetFlag(Nes.Status_C, false) // Old carry is 0
+
+	nes.Cpu.EmulateCycle()
+
+	finalMemoryValue := nes.Cpu.Memory[0x04A0]
+	if finalMemoryValue != 0x40 {
+		t.Errorf("ROR Memory: Wrong result in memory. Expected: 0x40, Got: 0x%02X", finalMemoryValue)
+	}
+	if nes.Cpu.GetFlag(Nes.Status_C) != false {
+		t.Errorf("ROR Memory: Failed to push Bit 0 to Carry. Expected: false")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_Z) != false {
+		t.Errorf("ROR Memory: Zero flag wrong. Expected: false")
+	}
+	if nes.Cpu.GetFlag(Nes.Status_N) != false {
+		t.Errorf("ROR Memory: Negative flag wrong. Expected: false because Bit 7 of result is 0")
+	}
+}

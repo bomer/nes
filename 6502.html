@@ -276,7 +276,7 @@ BEQ  Branch on Result Zero
      --------------------------------------------
      relative      BEQ oper      F0    2     2**
 
-
+DONE
 BIT  Test Bits in Memory with Accumulator
 
      bits 7 and 6 of operand are transfered to bit 7 and 6 of SR (N,V);
@@ -663,6 +663,7 @@ PLP  Pull Processor Status from Stack
      implied       PHP           28    1     4
 
 
+DONE     
 ROL  Rotate One Bit Left (Memory or Accumulator)
 
      C <- [76543210] <- C             N Z C I D V
@@ -676,7 +677,7 @@ ROL  Rotate One Bit Left (Memory or Accumulator)
      absolute      ROL oper      2E    3     6
      absolute,X    ROL oper,X    3E    3     7
 
-
+DONE
 ROR  Rotate One Bit Right (Memory or Accumulator)
 
      C -> [76543210] -> C             N Z C I D V

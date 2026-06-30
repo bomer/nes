@@ -719,12 +719,81 @@ func Plp(self *Cpu) {
 	fmt.Println("Running Op Plp")
 	self.S = self.Pull()
 }
+
+// Rol
+// ROL  Rotate One Bit Left (Memory or Accumulator)
+//
+//	C <- [76543210] <- C               N Z C I D V
+//	                                   + + + - - -
+//
+// This ones weird, carry bit gets added as like a 9 digit calculations
 func Rol(self *Cpu) {
-	log.Fatalln("Missing Op Code")
 	fmt.Println("Running Op Rol")
+	//Since this works in Accumulator Mode, we potentially need to look it up
+	var value byte
+	if self.info.Mode == Mode_Accumulator {
+		value = self.A
+	} else {
+		value = self.ReadAddressByte(self.address)
+	}
+
+	//Get the old carry information first
+	var oldCarry byte = 0
+	if self.GetFlag(Status_C) {
+		oldCarry = 1
+	}
+	newCarry := (value & 0x80) != 0
+	result := (value << 1) | oldCarry
+
+	// 3. Update all required CPU status flags
+	self.SetFlag(Status_C, newCarry)
+	self.SetFlag(Status_Z, result == 0)
+	self.SetFlag(Status_N, (result&0x80) != 0)
+
+	// 4. Write the final result back to its rightful home
+	if self.info.Mode == Mode_Accumulator {
+		self.A = result
+	} else {
+		self.WriteMemory(self.address, result)
+	}
+	//Get the new carry information based on the 7th digit of the  value
 }
+
+// ROR - Rotate One Bit Right, Samea s above but the other direction
 func Ror(self *Cpu) {
-	log.Fatalln("Missing Op Code")
+	// 1. Fetch the input byte based on the current mode
+	var value byte
+	if self.info.Mode == Mode_Accumulator {
+		value = self.A
+	} else {
+		value = self.ReadAddressByte(self.address)
+	}
+
+	// 2. Save the old carry flag state.
+	// Since it enters at Bit 7, we give it a value of 0x80 (10000000) if true.
+	var oldCarry byte = 0
+	if self.GetFlag(Status_C) {
+		oldCarry = 0x80
+	}
+
+	// 3. Determine the NEW carry flag (is Bit 0 currently 1?)
+	newCarry := (value & 0x01) != 0
+
+	// 4. Shift right by 1 and inject the old carry into Bit 7
+	result := (value >> 1) | oldCarry
+
+	// 5. Update CPU status flags
+	self.SetFlag(Status_C, newCarry)
+	self.SetFlag(Status_Z, result == 0)
+	self.SetFlag(Status_N, (result&0x80) != 0)
+
+	// 6. Write the final result back to its rightful home
+	if self.info.Mode == Mode_Accumulator {
+		self.A = result
+	} else {
+		self.WriteMemory(self.address, result)
+	}
+
 	fmt.Println("Running Op Ror")
 }
 
