@@ -46,8 +46,13 @@ type Ppu struct {
 	Memory   [0x3FFF + 1]byte // 16kb address space.
 	OAM      [256]byte        // Use reggister address to push sprite data in to this set of bytes. // TODO After rendering backgrounds + Register work
 
+	System *Nes // Ability to access the CPU NVI Directlys
+
 	//FrameBuffer to render on GUI Display.
 	FrameBuffer [256][240]uint8
+	// Storing a larger buffer so I can just have every cycle go in originally.
+	// TODO Get the timing write and only have the FrameBuffer being used
+	FullBuffer [341][262]uint8
 
 	TileMap [256 * 2]Sprite // Array of 256 sprites, for displaying in test render. Wont be used for real emulation
 
@@ -81,10 +86,10 @@ type Ppu struct {
 
 	// Internal registers
 	// The PPU also has 4 internal registers, described in detail on PPU scrolling:
-	v byte // v: During rendering, used for the scroll position. Outside of rendering, used as the current VRAM address.
-	t byte // t: During rendering, specifies the starting coarse-x scroll for the next scanline and the starting y scroll for the screen. Outside of rendering, holds the scroll or VRAM address before transferring it to v.
-	x byte // x: The fine-x position of the current scroll, used during rendering alongside v.
-	w byte // w: Toggles on each write to either PPUSCROLL or PPUADDR, indicating whether this is the first or second write. Clears on reads of PPUSTATUS. Sometimes called the 'write latch' or 'write toggle'.
+	v uint16 // v: During rendering, used for the scroll position. Outside of rendering, used as the current VRAM address.
+	t uint16 // t: During rendering, specifies the starting coarse-x scroll for the next scanline and the starting y scroll for the screen. Outside of rendering, holds the scroll or VRAM address before transferring it to v.
+	x byte   // x: The fine-x position of the current scroll, used during rendering alongside v.
+	w byte   // w: Toggles on each write to either PPUSCROLL or PPUADDR, indicating whether this is the first or second write. Clears on reads of PPUSTATUS. Sometimes called the 'write latch' or 'write toggle'.
 }
 
 // Returns Value of PPU Register, aligned with CPU mapping. 2000=0,2001=1
@@ -93,7 +98,7 @@ func (p *Ppu) ReadRegister(register uint8) byte {
 	//Status byte, resets the vblank when read and w write
 	case 2:
 		value := p.PPUSTATUS
-		p.PPUSTATUS &= 0x80
+		p.PPUSTATUS &= 0x7f
 		p.w = 0
 		p.DataBus = value
 		return value
@@ -112,32 +117,73 @@ func (p *Ppu) ReadRegister(register uint8) byte {
 }
 
 // Returns Value of PPU Register, aligned with CPU mapping. 2000=0,2001=1
-func (p *Ppu) WriteRegister(register uint8, value uint8) byte {
+func (p *Ppu) WriteRegister(register uint8, value uint8) {
 	p.DataBus = value
-	switch register {
-	//Status byte, resets the vblank when read and w write
-	case 2:
-		value := p.PPUSTATUS
-		p.PPUSTATUS &= 0x80
-		p.w = 0
-		p.DataBus = value
-		return value
-	case 4:
-		return p.OAM[p.OAMADDR]
-	case 7:
-		//Todo this isn't buffered properly
-		value := p.DataBusBuffer //p.PPUDATA[p.OAMADDR]
-		p.DataBus = value
-		return value
 
-	//Since only 2,4,7 are readable, we just return the Databus by default, some games need this
-	default:
-		return p.DataBus
+	switch register {
+	case 0: // PPUCTRL ($2000)
+		oldNmiEnabled := (p.PPUCTRL & 0x80) != 0
+		p.PPUCTRL = value
+		newNmiEnabled := (p.PPUCTRL & 0x80) != 0
+
+		// Update the nametable select bits inside the 't' register (bits 10 and 11)
+		p.t = (p.t & 0xF3FF) | (uint16(value&0x03) << 10)
+
+		// Trigger NMI if enabled during active VBlank
+		isInVblank := (p.PPUSTATUS & 0x80) != 0
+		if !oldNmiEnabled && newNmiEnabled && isInVblank {
+			p.System.Cpu.NmiPending = true
+		}
+
+	case 1: // PPUMASK ($2001)
+		p.PPUMASK = value
+
+	case 3: // OAMADDR ($2003)
+		p.OAMADDR = value
+
+	case 4: // OAMDATA ($2004)
+		p.OAM[p.OAMADDR] = value
+		p.OAMADDR++
+
+	case 5: // PPUSCROLL ($2005)
+		if p.w == 0 {
+			// First write: Code packs Coarse X into 't', and Fine X into 'x'
+			p.t = (p.t & 0xFFE0) | uint16(value>>3)
+			p.x = value & 0x07
+			p.w = 1
+		} else {
+			// Second write: Packs Fine Y and Coarse Y into 't'
+			p.t = (p.t & 0x0C1F) | (uint16(value&0x07) << 12) | (uint16(value>>3) << 5)
+			p.w = 0
+		}
+
+	case 6: // PPUADDR ($2006)
+		if p.w == 0 {
+			// First write: Target the High Byte of 't' (and clear top 2 bits)
+			p.t = (p.t & 0x00FF) | (uint16(value&0x3F) << 8)
+			p.w = 1
+		} else {
+			// Second write: Target the Low Byte of 't', then push it completely into 'v'
+			p.t = (p.t & 0xFF00) | uint16(value)
+			p.v = p.t // 'v' becomes the active VRAM address!
+			p.w = 0
+		}
+
+	case 7: // PPUDATA ($2007)
+		// Write directly to VRAM using 'v' as the pointer index
+		p.Memory[p.v] = value
+
+		// Advance 'v' based on the PPUCTRL increment bit selection
+		if (p.PPUCTRL & 0x04) == 0 {
+			p.v += 1 // Increment across horizontally
+		} else {
+			p.v += 32 // Increment down vertically
+		}
 	}
 }
 
 const MaxRenderableScanlines = 239
-const MaxScanLines = 262
+const MaxScanLines = 261
 const MaxPixelsPerScanline = 256
 
 type Sprite [8][8]uint8
@@ -181,8 +227,8 @@ func (p *Ppu) GetInfoForPatternTable() {
 	// println(p.Memory[0x2000:0x2FFF])
 
 	// fmt.Printf("ppu BANK 0x%x \n", p.Memory[0x2000:0x2FFF])
-	// tile := p.Memory[0:16]
-	// printTile(tile)
+	tile := p.Memory[0:16]
+	printTile(tile)
 
 	//Loop through first character bank for testing purposes.
 	for i := 0; i <= 0xff*16*2; i += 16 {
@@ -257,14 +303,37 @@ func (p *Ppu) EmulateCycle() {
 	nameTableX := p.Cycle / 8
 	nameTableY := p.ScanLine / 8
 	nameTableAddress := 0x2000 + (nameTableY * 32) + nameTableX
-	nameTableEntry := p.Memory[nameTableAddress]
-	fmt.Printf("Scanline: %d, Cycle: %d, NameTableData Pos X/Y:%d/%d, with address 0x%x and value 0x%x \n ", p.ScanLine, p.Cycle, nameTableX, nameTableY, nameTableAddress, nameTableEntry)
+	tileIndex := p.Memory[nameTableAddress]
+	fmt.Printf("Scanline: %d, Cycle: %d, NameTableData Pos X/Y:%d/%d, with address 0x%x and value 0x%x \n ", p.ScanLine, p.Cycle, nameTableX, nameTableY, nameTableAddress, tileIndex)
 
 	//Get the background from the pattern Table.
+	fineY := p.ScanLine % 8
+
+	lowPlaneAddr := p.GetBgPatternTableBase() + (uint16(tileIndex) << 4) + uint16(fineY)
+	highPlaneAddr := lowPlaneAddr + 8
+
+	lowByte := p.Memory[lowPlaneAddr]
+	highByte := p.Memory[highPlaneAddr]
+
+	// C. Extract the 2 bits for the current pixel column
+	fineX := p.Cycle % 8
+	bitShift := 7 - fineX
+
+	bit0 := (lowByte >> bitShift) & 1
+	bit1 := (highByte >> bitShift) & 1
+
+	colorIndex := (bit1 << 1) | bit0
+
+	// D. Write the raw color index (0, 1, 2, or 3) into the buffer
+	p.FullBuffer[p.Cycle][p.ScanLine] = colorIndex
 
 	//Get the attribute data to set the right colors.
 
+	//Draww to buffer
+	// p.FullBuffer[p.Cycle][p.ScanLine] = 0 // Replace with real color value
+
 	//Handle PPU Control Updates
+
 	// TODO _ set  BG lsbitaddressonly
 	if p.ScanLine == 240 && p.Cycle == 0 {
 
@@ -272,6 +341,12 @@ func (p *Ppu) EmulateCycle() {
 	//Set Vblank
 	if p.ScanLine == 241 && p.Cycle == 1 {
 		p.SetRegisterValue(7, true, &p.PPUSTATUS)
+		nmiEnabled := (p.PPUCTRL & 0x80) != 0
+		// fmt.Printf("--- VBLANK HIT! --- NMI Enabled in PPUCTRL: %v, Current CPU NmiPending: %v\n", nmiEnabled, p.System.Cpu.NmiPending)
+		// Pause()
+		if nmiEnabled {
+			p.System.Cpu.NmiPending = true
+		}
 	}
 	//Set Vblank
 	if p.ScanLine == 261 && p.Cycle == 1 {
@@ -288,10 +363,36 @@ func (p *Ppu) EmulateCycle() {
 	// New Frame/Render on GoMobile
 	if p.ScanLine > MaxScanLines {
 		p.Frame++
+		p.RenderTerminalFrame()
+		fmt.Printf("I have rendered a frame %d !", p.Frame)
 		Pause()
-		fmt.Printf("I have a frame ready to render frame %d !", p.Frame)
 		p.Cycle = 0
 		p.ScanLine = 0
+	}
+}
+
+// RenderTerminalFrame runs one full screen pass and prints it to the terminal
+func (p *Ppu) RenderTerminalFrame() {
+	// Print the resulting frame buffer to terminal
+	// Terminal fonts are usually twice as tall as they are wide.
+	// To prevent the image from looking stretched, we print two columns per pixel,
+	// or skip every other line/pixel depending on your terminal size.
+	colors := map[byte]string{
+		0: " ",                // Transparent/Blank
+		1: "\033[36m■\033[0m", // Cyan
+		2: "\033[34m■\033[0m", // Blue
+		3: "\033[31m■\033[0m", // Red
+	}
+
+	fmt.Print("\033[H\033[2J") // Clear screen terminal escape code
+
+	// We downsample slightly (step by 2) so it fits beautifully in a standard terminal window
+	for y := 0; y < 240; y += 2 {
+		for x := 0; x < 256; x++ {
+			colorIndex := p.FullBuffer[x][y]
+			fmt.Print(colors[colorIndex])
+		}
+		fmt.Println()
 	}
 }
 
@@ -320,4 +421,21 @@ func (self *Ppu) GetRegisterValue(position int, register *byte) bool {
 	}
 	return true
 
+}
+
+// Helper function to tell me if bit 4 of PPUCtrl si set, which means we're in pattern talbe 0 or 1
+func (p *Ppu) GetBgPatternTableBase() uint16 {
+	// Check if bit 4 (0x10) is set
+	if (p.PPUCTRL & 0x10) != 0 {
+		return 0x1000
+	}
+	return 0x0000
+}
+
+func (p *Ppu) GetSpritePatternTableBase() uint16 {
+	// Check if bit 3 (0x08) is set
+	if (p.PPUCTRL & 0x08) != 0 {
+		return 0x1000
+	}
+	return 0x0000
 }

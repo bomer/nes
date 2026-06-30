@@ -2,7 +2,6 @@ package nes
 
 import (
 	"fmt"
-	"log"
 )
 
 type Cpu struct {
@@ -31,6 +30,7 @@ type Cpu struct {
 	CycleCount       uint64
 	FrameCount       uint64
 	InstructionCount uint64 // Not useful number, but for my debugging
+	NmiPending       bool
 
 	Quiet      bool // Debug Logs
 	Debug      bool
@@ -71,6 +71,14 @@ func (self *Cpu) WriteMemory(address uint16, value byte) {
 	if !self.Quiet {
 		fmt.Printf("CPU-Writing adress %02x with %d \n", address, value)
 	}
+	if address >= 0x2000 && address < 0x4000 {
+		self.System.Ppu.WriteRegister(uint8(address&0x7), value)
+	}
+	if self.address == 0x4014 {
+		println("!!!!!!!!!!! 4014!!!!!!")
+		Pause()
+	}
+
 	//Don't write to ROM memory
 	if address > 0x8000 {
 		// fmt.Println("Someone try to write to bad memory!")
@@ -111,10 +119,11 @@ func (self *Cpu) WriteMemory(address uint16, value byte) {
 // OAMDMA	$4014	AAAA AAAA	W	OAM DMA high address
 func (self *Cpu) ReadAddressByte(start uint16) uint8 {
 
-	//Memory is mirrored for first 0x800/2k bytes
+	//Memory is mirrored for first 0x800/2k bytes for 3 times.
 	if start < 0x2000 {
 		return uint8(self.Memory[start&0x7FF])
 	}
+	//Register map for access the PPU, for some reaosn is mirrored up untill $4000
 	if start >= 0x2000 && start < 0x4000 {
 		fmt.Printf("Got PPU Memory for PPUCTRL %d", self.System.Ppu.PPUCTRL)
 		return self.System.Ppu.ReadRegister(uint8(start & 0x7))
@@ -266,9 +275,9 @@ func (self *Cpu) DecodeInstruction() {
 	self.PC += uint16(self.info.No_Bytes)
 	self.address = address
 
-	if self.address == 0x2007 || self.address == 0x2006 {
-		log.Fatalln("Interacting with VRM which I haven't coded shit")
-	}
+	// if self.address == 0x2007 || self.address == 0x2006 {
+	// 	log.Fatalln("Interacting with VRM which I haven't coded shit")
+	// }
 	//Run Operation
 	if self.info.Function != nil {
 		self.info.RunOperation(self)
@@ -285,11 +294,6 @@ func (self *Cpu) DecodeInstruction() {
 
 }
 
-func (self *Cpu) loadRom() {
-	// self.RomReader.LoadGame("mario.nes")
-	// LoadGame("mario.nes")
-}
-
 func (self *Cpu) Init() {
 	// Test mode lookup table
 	// fmt.Printf("Mode_Absolute %d \n", Mode_Absolute)
@@ -304,9 +308,41 @@ func (self *Cpu) Init() {
 
 }
 func (self *Cpu) EmulateCycle() {
+	if self.NmiPending {
+		Nmi(self)
+		return // Running the NMI sequence takes up clock cycles!
+	}
 	self.DecodeInstruction()
 
 }
+
+// DMA / Write to 0x4014 register, which writes directly to the OAM
+// Page is a 256 byte sections, so 0 = 0x0000-0x00ff
+func (self *Cpu) WriteOamData(page byte) {
+	dmaCycles := uint16(512)
+	startAddress := uint16(page) * 256 //
+	endAddress := startAddress + 256
+
+	//Todo, handle system.ppu.oamaddr to offset the slice insertion start.
+	copy(self.System.Ppu.OAM[:], self.Memory[startAddress:endAddress])
+
+	if self.CycleCount%2 == 0 {
+		dmaCycles += 1 // Even cycle alignment + write
+	} else {
+		dmaCycles += 2 // Odd cycle alignment + write
+	}
+	self.CycleCount += uint64(dmaCycles)
+	ppuCatchup := dmaCycles * 3
+
+	//Now the PPU has to play catch up for all the CPU cycles spent.
+	for i := 0; i < int(ppuCatchup); i++ {
+		self.System.Ppu.EmulateCycle()
+	}
+}
+
+//
+// Instructions
+//
 
 // Adc Add Memory to Accumulator with Carry
 // Must set Carry and Overflow Flag
@@ -914,4 +950,32 @@ func Tya(self *Cpu) {
 	fmt.Println("Running Op Tya")
 	self.A = self.Y
 	self.CheckNZ(self.A)
+}
+
+// Nmi - Non-Maskable Interrupt (Hardware Triggered
+// The PPU directly sets this via a status flag
+func Nmi(self *Cpu) {
+	fmt.Println("=== HARDWARE INTERRUPT: NMI TRIGGERED ===")
+	Pause()
+
+	// 1. Push the current Program Counter onto the stack (High byte first, then Low)
+	self.Push16Bit(self.PC)
+
+	// 2. Format the status register specifically for a hardware interrupt:
+	// Bit 4 (Break) MUST be 0
+	// Bit 5 (Unused) MUST be 1
+	// Formula: (Current S without Bit 4) OR Bit 5
+	hardwareStatus := (self.S & 0xEF) | 0x20
+	self.Push(hardwareStatus)
+
+	// 3. Set the Interrupt Disable flag so ordinary IRQs can't step on us
+	// (Though NMI itself ignores this flag, hence "Non-Maskable")
+	self.SetFlag(Status_I, true)
+
+	// 4. Look up the NMI execution target from the specific NMI Vector
+	// Vector Low: 0xFFFA, Vector High: 0xFFFB
+	self.PC = self.ReadAddress(0xFFFA)
+
+	// 5. Clear the pending flag so we don't loop endlessly
+	self.NmiPending = false
 }
