@@ -1,7 +1,6 @@
 package nes
 
 import (
-	"fmt"
 	"io/ioutil"
 )
 
@@ -23,7 +22,7 @@ func (self *Rom) LoadGame(filename string, nes *Nes) {
 	rom, _ := ioutil.ReadFile(filename)
 	rom_length := len(rom)
 	if rom_length > 0 {
-		fmt.Printf("Rom Length = %d\n", rom_length)
+		Debugf("Rom Length = %d\n", rom_length)
 	}
 
 	//Mario Header
@@ -44,17 +43,17 @@ func (self *Rom) LoadGame(filename string, nes *Nes) {
 		header.Ram_banks = 1
 	}
 
-	fmt.Printf("Nes Rom Info - %d PGR Banks, %d CHR Banks \n", header.PGR_banks, header.CHR_banks)
-	fmt.Printf("Control = %d", header.Control)
+	Debugf("Nes Rom Info - %d PGR Banks, %d CHR Banks \n", header.PGR_banks, header.CHR_banks)
+	Debugf("Control = %d", header.Control)
 
 	//Assuming MM0
 	PGRBytes := (1024 * 16) * int(header.PGR_banks) // + 16 to ignore header? Removed
-	fmt.Printf("Writing %d\n", PGRBytes)
+	Debugf("Writing %d\n", PGRBytes)
 	i := 0
 	for i = 0; i < PGRBytes; i++ {
 		nes.Cpu.WriteMemory(uint16(i+0x8000), rom[i+16])
 	}
-	fmt.Printf("wrote %d bytes \n", i)
+	Debugf("wrote %d bytes \n", i)
 	//Read bytes i to i + 8192
 
 	ppuRam := rom[i+16 : i+8192+16]
@@ -62,7 +61,7 @@ func (self *Rom) LoadGame(filename string, nes *Nes) {
 
 	copy(nes.Ppu.Memory[:], ppuRam)
 
-	// fmt.Printf("ppu BANK %x\n", nes.Ppu.Memory)
+	// Debugf("ppu BANK %x\n", nes.Ppu.Memory)
 
 	// This loads a array of sprites on the PPU for debug outputting.
 	nes.Ppu.GetInfoForPatternTable()
@@ -72,7 +71,7 @@ func (self *Rom) LoadGame(filename string, nes *Nes) {
 
 	// Now read 8k bytes and save to PPU ram.
 
-	// fmt.Printf("%%", cpu.Memory)
+	// Debugf("%%", cpu.Memory)
 	// if (4096 - 512) > 2^14 {
 	// 	for i := 0; i < rom_length; i++ {
 	// 		self.Memory[i+512] = rom[i]

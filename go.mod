@@ -1,6 +1,6 @@
 module github.com/bomer/nes
 
-go 1.17
+go 1.26
 
 require (
 	github.com/yuin/goldmark v1.4.13 // indirect

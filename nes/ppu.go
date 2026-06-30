@@ -226,30 +226,30 @@ func (p *Ppu) GetInfoForPatternTable() {
 	println("Checking at address 0x00, x:0,y:0")
 	// println(p.Memory[0x2000:0x2FFF])
 
-	// fmt.Printf("ppu BANK 0x%x \n", p.Memory[0x2000:0x2FFF])
+	// Debugf("ppu BANK 0x%x \n", p.Memory[0x2000:0x2FFF])
 	tile := p.Memory[0:16]
 	printTile(tile)
 
 	//Loop through first character bank for testing purposes.
 	for i := 0; i <= 0xff*16*2; i += 16 {
 
-		// fmt.Printf("Tile: i: %d \n\n", i)
+		// Debugf("Tile: i: %d \n\n", i)
 		tile := p.Memory[i : i+16]
 		p.TileMap[i/16] = printTile(tile)
 	}
-	// fmt.Printf("ppu BANK 0x%d\n", p.Memory[0x01])
+	// Debugf("ppu BANK 0x%d\n", p.Memory[0x01])
 }
 
 func printTile(tile []byte) Sprite {
 	var sprite Sprite
 	for i, v := range tile {
-		// fmt.Printf("Tile: i: %d %08b : int val - %d \n", i, v, v)
+		// Debugf("Tile: i: %d %08b : int val - %d \n", i, v, v)
 		//  128 64 32 16  8 4 2 1
 		if i < 8 {
 			rowOfPixels := BooleanArrayFromByte(v)
 			compositeRowOfPixels := BooleanArrayFromByte(tile[i+8])
 
-			// fmt.Printf("Pixels: i: %a:", rowOfPixels)
+			// Debugf("Pixels: i: %a:", rowOfPixels)
 			//Now build a tile with values 0,1,2,3
 			for pixelIndex, pixel := range rowOfPixels {
 				compositePixel := compositeRowOfPixels[pixelIndex]
@@ -304,7 +304,7 @@ func (p *Ppu) EmulateCycle() {
 	nameTableY := p.ScanLine / 8
 	nameTableAddress := 0x2000 + (nameTableY * 32) + nameTableX
 	tileIndex := p.Memory[nameTableAddress]
-	fmt.Printf("Scanline: %d, Cycle: %d, NameTableData Pos X/Y:%d/%d, with address 0x%x and value 0x%x \n ", p.ScanLine, p.Cycle, nameTableX, nameTableY, nameTableAddress, tileIndex)
+	Debugf("Scanline: %d, Cycle: %d, NameTableData Pos X/Y:%d/%d, with address 0x%x and value 0x%x \n ", p.ScanLine, p.Cycle, nameTableX, nameTableY, nameTableAddress, tileIndex)
 
 	//Get the background from the pattern Table.
 	fineY := p.ScanLine % 8
@@ -342,7 +342,7 @@ func (p *Ppu) EmulateCycle() {
 	if p.ScanLine == 241 && p.Cycle == 1 {
 		p.SetRegisterValue(7, true, &p.PPUSTATUS)
 		nmiEnabled := (p.PPUCTRL & 0x80) != 0
-		// fmt.Printf("--- VBLANK HIT! --- NMI Enabled in PPUCTRL: %v, Current CPU NmiPending: %v\n", nmiEnabled, p.System.Cpu.NmiPending)
+		// Debugf("--- VBLANK HIT! --- NMI Enabled in PPUCTRL: %v, Current CPU NmiPending: %v\n", nmiEnabled, p.System.Cpu.NmiPending)
 		// Pause()
 		if nmiEnabled {
 			p.System.Cpu.NmiPending = true
@@ -364,7 +364,7 @@ func (p *Ppu) EmulateCycle() {
 	if p.ScanLine > MaxScanLines {
 		p.Frame++
 		p.RenderTerminalFrame()
-		fmt.Printf("I have rendered a frame %d !", p.Frame)
+		Debugf("I have rendered a frame %d !", p.Frame)
 		Pause()
 		p.Cycle = 0
 		p.ScanLine = 0
@@ -400,19 +400,19 @@ func (p *Ppu) RenderTerminalFrame() {
 //
 // 7654 3210
 func (self *Ppu) SetRegisterValue(position int, tovalue bool, register *byte) {
-	fmt.Printf("Setting flag at positon %d to %t - ", position, tovalue)
-	fmt.Printf("Before - %b ", *register)
+	Debugf("Setting flag at positon %d to %t - ", position, tovalue)
+	Debugf("Before - %b ", *register)
 	if tovalue {
 		*register |= 1 << uint8(position)
 	} else {
 		*register &= ^(1 << uint8(position))
 	}
-	fmt.Printf("After - %b \n", (*register))
+	Debugf("After - %b \n", (*register))
 }
 
 // Used to read the register value at a position
 func (self *Ppu) GetRegisterValue(position int, register *byte) bool {
-	fmt.Printf("Getting flag at positon %d ", position)
+	Debugf("Getting flag at positon %d ", position)
 	var n byte
 	//Checking with logic and
 	n = *register & (1 << uint8(position))

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/bomer/nes/nes"
@@ -10,14 +8,11 @@ import (
 
 var myNes nes.Nes
 
-// Your custom helper
-func debugf(format string, args ...any) {
-	slog.Logf(context.Background(), slog.LevelDebug, format, args...)
-}
-
 func main() {
 
-	fmt.Printf("Initing...")
+	slog.SetLogLoggerLevel(slog.LevelError)
+
+	nes.Debugf("Initing...")
 	myNes.Cpu.Quiet = true
 	myNes.Rom.LoadGame("mario.nes", &myNes)
 	// myNes.Cpu.Quiet = false
