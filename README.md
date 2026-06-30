@@ -18,15 +18,19 @@ Done so far this year (2023):
 
 # TODO
 
-- [x] Start doing PPU Tick Processing, building a buffer for display and processing background and sprites - Handy Reference - https://austinmorlan.com/posts/nes_rendering_overview/
-- [ ] Load Background onto buffer and render
-- [ ] Memory Mirroring for PPU
-- [x] Load Sprites
-- [x] Memory Mapped PPU Memory Reads
-- [ ] Memory Map PPU memory Writes.
-- [ ] Memory Map OAM writes on 0x4014 + attribute tables else screen will never update
+- [ ] Pallette Mapping
+- [ ] Scrolling for Backgrounds
+- [ ] Draw Sprites
+- [ ] Big Sprite SUpport
 - [ ] Controls mapping
 - [ ] Making mario fully playable
+- [x] Start doing PPU Tick Processing, building a buffer for display and processing background and sprites - Handy Reference - https://austinmorlan.com/posts/nes_rendering_overview/
+- [x] Load Background onto buffer and render
+- [x] Memory Mirroring for PPU
+- [x] Load Sprites
+- [x] Memory Mapped PPU Memory Reads
+- [x] Memory Map PPU memory Writes.
+- [x] Memory Map OAM writes on 0x4014 + attribute tables else screen will never update
 
 # Far Future:
 
